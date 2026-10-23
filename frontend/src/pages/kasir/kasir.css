@@ -1,0 +1,248 @@
+:root {
+  --primary-color: #12526b;
+  --secondary-color: #1a7599;
+  --bg-body: #f4f6f8;
+  --border-color: #e2e8f0;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-body);
+  color: #1e293b;
+  overflow: hidden; /* Mencegah scroll di level window utama */
+}
+
+/* Container Utama App */
+.kasir {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Pembungkus Kanan (Header + Body Konten) */
+.main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Area Flexbox untuk Menu & Cart */
+.content-area {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Container Menu (Memenuhi sisa ruang) */
+.menu-container {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+/* Panel Keranjang */
+.cart-container {
+  width: 360px;
+  background-color: #ffffff;
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+/* RESPONSIF LAYAR KECIL (Tablet & Smartphone) */
+@media (max-width: 1024px) {
+  .cart-container {
+    width: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+
+  .content-area {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .main-wrapper {
+    height: auto;
+    overflow: visible;
+  }
+
+  .cart-container {
+    width: 100%;
+    border-left: none;
+    border-top: 2px solid var(--border-color);
+  }
+}
+.payment-option-overlay {
+    position: fixed;
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.45);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 9999;
+}
+
+.payment-option-modal {
+    width: 430px;
+    max-width: calc(100% - 40px);
+
+    background: white;
+
+    border-radius: 18px;
+
+    padding: 28px;
+
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+
+    animation: paymentModalShow 0.2s ease;
+}
+
+@keyframes paymentModalShow {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.payment-option-header {
+    text-align: center;
+
+    margin-bottom: 25px;
+}
+
+.payment-option-header h2 {
+    margin: 0;
+
+    font-size: 24px;
+}
+
+.payment-option-header p {
+    margin-top: 7px;
+
+    color: #777;
+
+    font-size: 14px;
+}
+
+.payment-options {
+    display: flex;
+    flex-direction: column;
+
+    gap: 14px;
+}
+
+.payment-option {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 18px;
+
+    background: white;
+
+    border: 2px solid #eeeeee;
+
+    border-radius: 14px;
+
+    cursor: pointer;
+
+    text-align: left;
+
+    transition: 0.2s;
+}
+
+.payment-option:hover {
+    border-color: #258cec;
+
+    background: #f7fbff;
+
+    transform: translateY(-2px);
+}
+
+.payment-option:disabled {
+    opacity: 0.6;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+.payment-option-icon {
+    width: 52px;
+    height: 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: #f1f5f9;
+
+    font-size: 27px;
+
+    flex-shrink: 0;
+}
+
+.payment-option-info h3 {
+    margin: 0 0 5px;
+    color: #333;
+    font-size: 17px;
+}
+
+.payment-option-info p {
+    margin: 0;
+
+    color: #777;
+
+    font-size: 13px;
+}
+
+.payment-option-close {
+    width: 100%;
+
+    margin-top: 20px;
+
+    padding: 12px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: #eeeeee;
+
+    color: #555;
+
+    font-size: 14px;
+
+    cursor: pointer;
+}
+
+.payment-option-close:hover {
+    background: #e2e2e2;
+}
+

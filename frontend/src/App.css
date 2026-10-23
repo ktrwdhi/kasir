@@ -1,0 +1,87 @@
+:root {
+  --primary-color: #12526b;
+  --secondary-color: #1a7599;
+  --bg-body: #f4f6f8;
+  --border-color: #e2e8f0;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-body);
+  color: #1e293b;
+  overflow: hidden; /* Mencegah scroll di level window utama */
+}
+
+/* Container Utama App */
+.app-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Pembungkus Kanan (Header + Body Konten) */
+.main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Area Flexbox untuk Menu & Cart */
+.content-area {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Container Menu (Memenuhi sisa ruang) */
+.menu-container {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+/* Panel Keranjang */
+.cart-container {
+  width: 360px;
+  background-color: #ffffff;
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+/* RESPONSIF LAYAR KECIL (Tablet & Smartphone) */
+@media (max-width: 1024px) {
+  .cart-container {
+    width: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
+  }
+
+  .content-area {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .main-wrapper {
+    height: auto;
+    overflow: visible;
+  }
+
+  .cart-container {
+    width: 100%;
+    border-left: none;
+    border-top: 2px solid var(--border-color);
+  }
+}

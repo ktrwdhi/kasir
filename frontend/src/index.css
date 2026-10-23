@@ -1,0 +1,26 @@
+@font-face {
+  font-family: "ChangaOne-Italic";
+  src: url("./assets/fonts/ChangaOne-Italic.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "ChangaOne-Regular";
+  src: url("./assets/fonts/ChangaOne-Regular.ttf") format("truetype");
+}
+
+@font-face{
+  font-family: "LuckiestGuy-Regular";
+  src: url("./assets/fonts/LuckiestGuy-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "rubik";
+  src: url("./assets/fonts/Rubik-VariableFont_wght.ttf") format("truetype");
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
