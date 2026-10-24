@@ -16,4 +16,8 @@ class sales extends Model
         'cash',
         'change'
     ];
+
+    public function outlet(){
+        return $this->belongsTo(outlet::class,'outlet_id');
+    }
 }
