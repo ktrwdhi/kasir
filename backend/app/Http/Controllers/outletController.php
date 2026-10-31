@@ -8,6 +8,7 @@ use App\Models\products;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
 class outletController extends Controller
 {
@@ -39,6 +40,7 @@ class outletController extends Controller
             
     //     return response()->json($category);
     // }
+
 
     public function getCategory(Request $request)
 {
@@ -92,13 +94,15 @@ class outletController extends Controller
         // }
         $user = $request->user();
         $outlet_id = $user->outlet_id;
-        $product = Cache::remember('product_outlet_'.$outlet_id,now()->addMinutes(5),function() use ($outlet_id){
+        //$product = Cache::remember('product_outlet_'.$outlet_id,now()->addMinutes(5),function() use ($outlet_id){ -->
             $product = products::where('outlet_id', $outlet_id)
             ->select('id', 'outlet_id','category_id', 'name', 'price', 'stock', 'image')
             ->get()
             ->toArray();
-            return $product;
-        });
+            //return $product;
+        //});
         return response()->json($product);
     }
+
+    
 }

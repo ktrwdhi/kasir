@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\productDetail;
 use App\Models\products;
 use App\Models\sale_detail;
 use Illuminate\Http\Request;
@@ -13,9 +14,9 @@ class dashboardController extends Controller
     {
         $totalProducts = products::count();
 
-        $totalStock = products::sum('stock');
+        $totalStock = productDetail::sum('stock');
 
-        $lowStock = products::where('stock', '<=', 5)->count();
+        $lowStock = productDetail::where('stock', '<=', 5)->count();
         $transactionCount = sale_detail::distinct('product_id')->count('product_id');
 
         $recentSales = sale_detail::with([

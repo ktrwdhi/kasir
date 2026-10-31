@@ -1,48 +1,104 @@
+
 @extends('template.admin')
 
 @section('content')
-
-@section('page-title','Outlets')
+@section('page-title', 'Outlets')
 
 <div class="container-fluid outlet-page">
 
-    {{-- Header --}}
-
+    {{-- HEADER --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
 
         <div>
             <h3 class="fw-bold mb-1">
-                Outlet
+                {{ isset($product) ? 'Outlet Penjual Produk' : 'Outlet' }}
             </h3>
 
             <p class="text-muted mb-0">
-                Kelola outlet yang tersedia.
+                @if(isset($product))
+                    Daftar outlet yang menjual {{ $product->name }}.
+                @else
+                    Kelola outlet yang tersedia.
+                @endif
             </p>
         </div>
 
         <div class="d-flex align-items-center gap-2">
 
+            @if(isset($product))
+                <a href="{{ route('admin.products.index') }}" class="btn btn-light">
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Kembali
+                </a>
+            @endif
+
             <span class="badge bg-primary rounded-pill px-3 py-2">
                 {{ $outlets->count() }} Outlet
             </span>
 
-            <button
-                type="button"
-                class="btn btn-primary"
-                data-bs-toggle="modal"
-                data-bs-target="#addOutletModal"
-            >
-                <i class="bi bi-plus-lg me-1"></i>
-                Tambah Outlet
-            </button>
+            @if(!isset($product))
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#addOutletModal"
+                >
+                    <i class="bi bi-plus-lg me-1"></i>
+                    Tambah Outlet
+                </button>
+            @endif
 
         </div>
 
     </div>
 
 
-    {{-- List Outlet --}}
+    {{-- INFORMASI PRODUK --}}
+    @if(isset($product))
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-3">
 
+                <div class="d-flex align-items-center gap-3">
+
+                    @if($product->image)
+                        <img
+                            src="{{ asset('storage/' . $product->image) }}"
+                            alt="{{ $product->name }}"
+                            width="65"
+                            height="65"
+                            style="object-fit: cover; border-radius: 10px;"
+                        >
+                    @else
+                        <div
+                            class="bg-light d-flex align-items-center justify-content-center"
+                            style="width: 65px; height: 65px; border-radius: 10px;"
+                        >
+                            <i class="bi bi-image fs-3 text-muted"></i>
+                        </div>
+                    @endif
+
+                    <div>
+                        <h5 class="fw-bold mb-1">
+                            {{ $product->name }}
+                        </h5>
+
+                        <p class="text-muted mb-1">
+                            {{ $product->category->name ?? '-' }}
+                        </p>
+
+                        <span class="fw-semibold text-primary">
+                            Rp {{ number_format($product->price, 0, ',', '.') }}
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    @endif
+
+
+    {{-- LIST OUTLET --}}
     <div class="row g-4">
 
         @forelse ($outlets as $outlet)
@@ -50,7 +106,7 @@
             <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
 
                 <a
-                    href="{{ route('admin.outlet.show',$outlet->uuid) }}"
+                    href="{{ route('admin.outlet.show', $outlet->uuid) }}"
                     class="outlet-link"
                 >
 
@@ -58,34 +114,24 @@
 
                         <div class="card-body p-4">
 
-                            <div class="d-flex justify-content-between
-                                        align-items-start mb-4">
+                            <div class="d-flex justify-content-between align-items-start mb-4">
 
                                 <div class="outlet-icon">
-
                                     <i class="bi bi-shop"></i>
-
                                 </div>
 
-                                <i class="bi bi-arrow-up-right
-                                          outlet-arrow"></i>
+                                <i class="bi bi-arrow-up-right outlet-arrow"></i>
 
                             </div>
-
 
                             <h5 class="fw-bold mb-2">
                                 {{ $outlet->name }}
                             </h5>
 
-
                             <p class="text-muted small mb-4">
-
                                 <i class="bi bi-geo-alt me-1"></i>
-
                                 {{ $outlet->address ?? 'Alamat belum tersedia' }}
-
                             </p>
-
 
                             <div class="outlet-footer">
 
@@ -105,7 +151,6 @@
 
             </div>
 
-
         @empty
 
             <div class="col-12">
@@ -115,11 +160,19 @@
                     <i class="bi bi-shop display-4 text-muted"></i>
 
                     <h5 class="fw-bold mt-3">
-                        Belum Ada Outlet
+                        @if(isset($product))
+                            Belum Ada Outlet
+                        @else
+                            Belum Ada Outlet
+                        @endif
                     </h5>
 
                     <p class="text-muted mb-0">
-                        Data outlet belum tersedia.
+                        @if(isset($product))
+                            Belum ada outlet yang menjual produk {{ $product->name }}.
+                        @else
+                            Data outlet belum tersedia.
+                        @endif
                     </p>
 
                 </div>
@@ -137,6 +190,8 @@
 {{-- MODAL TAMBAH OUTLET --}}
 {{-- ================================================== --}}
 
+@if(!isset($product))
+
 <div
     class="modal fade"
     id="addOutletModal"
@@ -149,8 +204,7 @@
 
         <div class="modal-content">
 
-            {{-- Header Modal --}}
-
+            {{-- HEADER MODAL --}}
             <div class="modal-header">
 
                 <div>
@@ -178,10 +232,9 @@
             </div>
 
 
-            {{-- Form --}}
-
+            {{-- FORM --}}
             <form
-                action=""
+                action="{{ route('admin.outlet.store') }}"
                 method="POST"
             >
 
@@ -189,9 +242,7 @@
 
                 <div class="modal-body">
 
-
-                    {{-- Nama Outlet --}}
-
+                    {{-- NAMA OUTLET --}}
                     <div class="mb-3">
 
                         <label
@@ -212,18 +263,15 @@
                         >
 
                         @error('name')
-
                             <div class="invalid-feedback">
                                 {{ $message }}
                             </div>
-
                         @enderror
 
                     </div>
 
 
-                    {{-- Alamat --}}
-
+                    {{-- ALAMAT --}}
                     <div class="mb-3">
 
                         <label
@@ -242,21 +290,17 @@
                         >{{ old('address') }}</textarea>
 
                         @error('address')
-
                             <div class="invalid-feedback">
                                 {{ $message }}
                             </div>
-
                         @enderror
 
                     </div>
 
-
                 </div>
 
 
-                {{-- Footer Modal --}}
-
+                {{-- FOOTER MODAL --}}
                 <div class="modal-footer">
 
                     <button
@@ -285,25 +329,23 @@
 
 </div>
 
+@endif
 
-{{-- Buka modal otomatis jika validasi error --}}
 
-@if($errors->any())
+{{-- BUKA MODAL OTOMATIS JIKA VALIDASI ERROR --}}
+@if($errors->any() && !isset($product))
 
 <script>
-
     document.addEventListener('DOMContentLoaded', function () {
 
-        const modalElement =
-            document.getElementById('addOutletModal');
+        const modalElement = document.getElementById('addOutletModal');
 
-        const modal =
-            new bootstrap.Modal(modalElement);
-
-        modal.show();
+        if (modalElement) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        }
 
     });
-
 </script>
 
 @endif
