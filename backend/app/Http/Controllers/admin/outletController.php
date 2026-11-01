@@ -94,11 +94,21 @@ class outletController extends Controller
             ->unique('id')
             ->values();
 
+        $product = products::findOrFail($id);
+
+        $availableOutlets = outlet::whereDoesntHave('productDetails', function ($query) use ($id) {
+            $query->where('product_id', $id);
+        })->get();
+        
         return view('admin.outlet', compact(
             'product',
             'outlets',
-            'categories'
+            'categories',
+            'availableOutlets'
         ));
+        
+
+        // return $availableOutlets;
     }
 
     public function store(Request $request)

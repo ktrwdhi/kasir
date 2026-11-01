@@ -7,6 +7,7 @@ use App\Models\productDetail;
 use App\Models\products;
 use App\Models\sale_detail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class dashboardController extends Controller
 {
@@ -27,12 +28,23 @@ class dashboardController extends Controller
         ->take(5)
         ->get();
 
+        $transactionsByOutlet = DB::table('sales')
+        ->join('outlets', 'sales.outlet_id', '=', 'outlets.id')
+        ->select(
+            'outlets.name as outlet_name',
+            DB::raw('COUNT(sales.id) as total_transactions')
+        )
+        ->groupBy('outlets.id', 'outlets.name')
+        ->orderByDesc('total_transactions')
+        ->get();
+
         return view('admin.dashboard', compact(
             'totalProducts',
             'totalStock',
             'lowStock',
             'recentSales',
-            'transactionCount'
+            'transactionCount',
+            'transactionsByOutlet'
         ));
     }
 }

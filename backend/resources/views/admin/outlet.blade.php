@@ -1,4 +1,3 @@
-
 @extends('template.admin')
 
 @section('content')
@@ -53,10 +52,29 @@
     </div>
 
 
+    {{-- ALERT SUCCESS --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    {{-- ALERT ERROR --}}
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+
     {{-- INFORMASI PRODUK --}}
     @if(isset($product))
         <div class="card border-0 shadow-sm mb-4">
-            <div class="card-body p-3">
+            <div class="card-body-product p-3">
 
                 <div class="d-flex align-items-center gap-3">
 
@@ -86,11 +104,23 @@
                             {{ $product->category->name ?? '-' }}
                         </p>
 
-                        <span class="fw-semibold text-primary">
-                            Rp {{ number_format($product->price, 0, ',', '.') }}
+                        <span class="text-muted small">
+                            Harga ditentukan berdasarkan outlet.
                         </span>
                     </div>
 
+                </div>
+
+                <div class="button">
+                    <button
+                        type="button"
+                        class="tambah"
+                        data-bs-toggle="modal"
+                        data-bs-target="#addProductToOutletModal"
+                    >
+                        <i class="bi bi-plus-lg me-1"></i>
+                        Tambahkan ke Outlet yang Tersedia
+                    </button>
                 </div>
 
             </div>
@@ -160,16 +190,12 @@
                     <i class="bi bi-shop display-4 text-muted"></i>
 
                     <h5 class="fw-bold mt-3">
-                        @if(isset($product))
-                            Belum Ada Outlet
-                        @else
-                            Belum Ada Outlet
-                        @endif
+                        Belum Ada Outlet
                     </h5>
 
                     <p class="text-muted mb-0">
                         @if(isset($product))
-                            Belum ada outlet yang menjual produk {{ $product->name }}.
+                            Belum ada outlet yang tersedia.
                         @else
                             Data outlet belum tersedia.
                         @endif
@@ -184,6 +210,234 @@
     </div>
 
 </div>
+
+
+{{-- ================================================== --}}
+{{-- MODAL TAMBAH PRODUK KE OUTLET --}}
+{{-- ================================================== --}}
+
+@if(isset($product))
+
+<div
+    class="modal fade"
+    id="addProductToOutletModal"
+    tabindex="-1"
+    aria-labelledby="addProductToOutletModalLabel"
+    aria-hidden="true"
+>
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+            {{-- HEADER MODAL --}}
+            <div class="modal-header">
+
+                <div>
+                    <h5
+                        class="modal-title fw-bold"
+                        id="addProductToOutletModalLabel"
+                    >
+                        Tambahkan Produk ke Outlet
+                    </h5>
+
+                    <small class="text-muted">
+                        Pilih outlet dan tentukan harga serta stok produk.
+                    </small>
+                </div>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                ></button>
+
+            </div>
+
+
+            {{-- FORM --}}
+            <form
+                action="{{ route('admin.products.attach') }}"
+                method="POST"
+            >
+
+                @csrf
+
+                <div class="modal-body">
+
+                    {{-- PRODUCT ID --}}
+                    <input
+                        type="hidden"
+                        name="product_id"
+                        value="{{ $product->id }}"
+                    >
+
+
+                    {{-- INFORMASI PRODUK --}}
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            Nama Produk
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="{{ $product->name }}"
+                            disabled
+                        >
+
+                    </div>
+
+                @if($availableOutlets->isNotEmpty())
+                    
+                    <div class="mb-3">
+
+                        <label
+                            for="outlet_id"
+                            class="form-label fw-semibold"
+                        >
+                            Pilih Outlet
+                        </label>
+
+                        <select
+                            name="outlet_id"
+                            id="outlet_id"
+                            class="form-select @error('outlet_id') is-invalid @enderror"
+                            required
+                        >
+
+                            <option value="">
+                                -- Pilih Outlet --
+                            </option>
+
+                            @foreach($availableOutlets as $outlet)
+                                <option
+                                    value="{{ $outlet->id }}"
+                                    {{ old('outlet_id') == $outlet->id ? 'selected' : '' }}
+                                >
+                                    {{ $outlet->name }}
+                                </option>
+                            @endforeach
+
+                        </select>
+
+                        @error('outlet_id')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+
+                    </div>
+
+
+                    {{-- HARGA PRODUK --}}
+                    <div class="mb-3">
+
+                        <label
+                            for="price"
+                            class="form-label fw-semibold"
+                        >
+                            Harga Produk
+                        </label>
+
+                        <input
+                            type="number"
+                            name="price"
+                            id="price"
+                            class="form-control @error('price') is-invalid @enderror"
+                            value="{{ old('price') }}"
+                            placeholder="Masukkan harga produk"
+                            min="0"
+                            required
+                        >
+
+                        @error('price')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+
+                    </div>
+
+
+                    {{-- STOK PRODUK --}}
+                    <div class="mb-3">
+
+                        <label
+                            for="stock"
+                            class="form-label fw-semibold"
+                        >
+                            Stok Awal
+                        </label>
+
+                        <input
+                            type="number"
+                            name="stock"
+                            id="stock"
+                            class="form-control @error('stock') is-invalid @enderror"
+                            placeholder="Masukkan stok awal"
+                            min="0"
+                            required
+                        >
+
+                        @error('stock')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
+
+                    </div>
+
+                </div>
+            @else
+                <label
+                    for="outlet_id"
+                    class="form-label fw-semibold"
+                >
+                    Pilih Outlet
+                </label>
+                <input
+                    type="text"
+                    class="form-control"
+                    value="Semua outlet sudah menjual produk ini"
+                    disabled
+                >
+            @endif
+                    {{-- PILIH OUTLET --}}
+
+
+                {{-- FOOTER MODAL --}}
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-light"
+                        data-bs-dismiss="modal"
+                    >
+                        Batal
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        <i class="bi bi-plus-lg me-1"></i>
+                        Tambahkan Produk
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+@endif
 
 
 {{-- ================================================== --}}
@@ -332,13 +586,24 @@
 @endif
 
 
+{{-- ================================================== --}}
 {{-- BUKA MODAL OTOMATIS JIKA VALIDASI ERROR --}}
-@if($errors->any() && !isset($product))
+{{-- ================================================== --}}
+
+@if($errors->any())
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
 
-        const modalElement = document.getElementById('addOutletModal');
+        @if(isset($product))
+
+            const modalElement = document.getElementById('addProductToOutletModal');
+
+        @else
+
+            const modalElement = document.getElementById('addOutletModal');
+
+        @endif
 
         if (modalElement) {
             const modal = new bootstrap.Modal(modalElement);
@@ -414,6 +679,25 @@
         background: #fff;
         border-radius: 16px;
         border: 1px dashed #dee2e6;
+    }
+
+    .card-body-product {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .button button {
+        border: none;
+        padding: 10px;
+        border-radius: 10px;
+        background-color: rgb(57, 126, 253);
+        color: white;
+        font-weight: bold;
+    }
+
+    .button button:hover {
+        background-color: rgb(35, 105, 235);
     }
 
 </style>

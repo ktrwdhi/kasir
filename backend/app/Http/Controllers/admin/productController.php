@@ -138,26 +138,48 @@ class productController extends Controller
             ->with('success', 'Produk berhasil dihapus.');
     }
 
-    public function attach(Request $request){
-        $outletId = $request->uuid;
+    public function attach(Request $request)
+    {
+        $validate = $request->validate([
+            'product_id' => 'required|integer|exists:products,id',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+        ], [
+            'product_id.required' => 'Produk wajib dipilih.',
+            'product_id.exists' => 'Produk tidak ditemukan.',
+
+            'price.required' => 'Harga produk wajib diisi.',
+            'price.numeric' => 'Harga harus berupa angka.',
+            'price.min' => 'Harga tidak boleh kurang dari 0.',
+
+            'stock.required' => 'Stok produk wajib diisi.',
+            'stock.integer' => 'Stok harus berupa bilangan bulat.',
+            'stock.min' => 'Stok tidak boleh kurang dari 0.',
+        ]);
+
+        $outletId = $request->outlet_id;
         $productId = $request->product_id;
-        $cekProduct = $this->cekProductByOutlet($outletId,$productId);
-        if($cekProduct){
-            return "ada";
+
+        $cekProduct = $this->cekProductByOutlet($productId, $outletId);
+
+        if ($cekProduct) {
+            return back()->with('error', 'Produk sudah tersedia di outlet ini.');
         }
-        else{
-            return "gaada";
-        }
+
+        productDetail::create([
+            'product_id' => $productId,
+            'outlet_id' => $outletId,
+            'price' => $request->price,
+            'stock' => $request->stock,
+        ]);
+
+        return back()->with('success', 'Produk berhasil ditambahkan ke outlet.');
     }
 
-    private function cekProductByOutlet($outletId,$productId)
+    private function cekProductByOutlet($productId, $outletId)
     {
-        $product = outlet::where('id', $outletId)
-            ->whereHas('products', function ($query) use ($productId) {
-                $query->where('id', $productId);
-            })
+        return productDetail::where('product_id', $productId)
+            ->where('outlet_id', $outletId)
             ->exists();
-
-        return $product;
     }
 }
