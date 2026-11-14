@@ -21,7 +21,9 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'uuid',
         'username',
+        'email',
         'name',
         'password',
         'outlet_id',
@@ -39,6 +41,12 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    
+    public function outlet()
+    {
+        return $this->belongsTo(Outlet::class, 'outlet_id');
+    }
 
     /**
      * Get the attributes that should be cast.

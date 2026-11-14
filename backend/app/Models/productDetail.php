@@ -8,6 +8,7 @@ class productDetail extends Model
 {
     protected $fillable = [
         'product_id',
+        'product_varian_id',
         'outlet_id',
         'price',
         'stock'
@@ -21,5 +22,10 @@ class productDetail extends Model
     public function outlet()
     {
         return $this->belongsTo(outlet::class, 'outlet_id');
+    }
+
+    public function varians()
+    {
+        return $this->belongsTo(productVarian::class, 'product_varian_id');
     }
 }

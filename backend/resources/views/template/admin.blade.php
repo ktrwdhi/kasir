@@ -197,16 +197,14 @@
             <span>Outlet</span>
         </a>
 
-        <div class="menu-title mt-4">
-            Lainnya
-        </div>
-
-        <a href="#">
-            <i class="bi bi-receipt"></i>
-            Transaksi
+        <a href="{{ route('admin.transactions.index') }}"
+           class="nav-link {{ request()->routeIs('admin.transactions.*') ? 'active' : '' }}">
+           <i class="bi bi-receipt"></i>
+           Transaksi
         </a>
-
-        <a href="#">
+        
+        <a href="{{ route('admin.users.index') }}"
+            class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
             <i class="bi bi-people"></i>
             Pengguna
         </a>
@@ -254,7 +252,7 @@
                     </div>
 
                     <small class="text-muted">
-                        Administrator
+                        {{ ucFirst(auth()->user()->role) }}
                     </small>
                 </div>
 

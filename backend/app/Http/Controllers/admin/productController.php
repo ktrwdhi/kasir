@@ -7,6 +7,7 @@ use App\Models\category;
 use App\Models\outlet;
 use App\Models\productDetail;
 use App\Models\products;
+use App\Models\productVarian;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -40,31 +41,55 @@ class productController extends Controller
             'category_id' => 'required|exists:categories,id',
             'outlet_id' => 'required|exists:outlets,id',
             'name' => 'required|string|max:255',
+            'varian' => 'nullable|string|max:255',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $image = null;
+        DB::transaction(function () use ($request) {
 
-        if ($request->hasFile('image')) {
-            $image = $request->file('image')->store('products', 'public');
-        }
+            $image = null;
 
-        DB::transaction(function () use ($request, $image) {
+            if ($request->hasFile('image')) {
+                $image = $request->file('image')
+                    ->store('products', 'public');
+            }
 
-            $product = products::create([
-                'category_id' => $request->category_id,
-                'name' => $request->name,
-                'price' => $request->price,
-                'image' => $image,
-            ]);
+            $product = products::firstOrCreate(
+                [
+                    'name' => $request->name,
+                ],
+                [
+                    'category_id' => $request->category_id,
+                    'image' => $image,
+                ]
+            );
 
+            $existingVarian = productVarian::where('product_id', $product->id)
+                ->where('name', $request->varian)
+                ->first();
+            
+            if(!$existingVarian){
+                if($request->varian !== null && $request->varian !== ''){
+                    $existingVarian = productVarian::create([
+                        'product_id' => $product->id,
+                        'name' => $request->varian,
+                    ]);
+                } else {
+                    $existingVarian = null;
+                }
+            }
+            
+                
             productDetail::create([
                 'product_id' => $product->id,
+                'product_varian_id' => $existingVarian?->id,
                 'outlet_id' => $request->outlet_id,
                 'stock' => $request->stock,
+                'price' => $request->price,
             ]);
+                
         });
 
         return back()->with('success', 'Produk berhasil ditambahkan.');
@@ -74,18 +99,19 @@ class productController extends Controller
     public function update(Request $request, $id)
     {
         $product = products::findOrFail($id);
+        $productDetail = productDetail::where('product_id', $id)->first();
 
-        if ($request->type == 'stock') {
+        if ($request->submit == 'updateStock') {
 
             $request->validate([
                 'stock' => 'required|integer|min:0'
             ]);
 
-            $product->update([
+            $productDetail->update([
                 'stock' => $request->stock
             ]);
 
-        } elseif ($request->type == 'image') {
+        } elseif ($request->submit == 'updateImage') {
 
             $request->validate([
                 'image' => 'required|image|mimes:jpg,jpeg,png|max:2048'
@@ -104,7 +130,7 @@ class productController extends Controller
                 'image' => $image
             ]);
 
-        } elseif ($request->type == 'data') {
+        } elseif ($request->submit == 'updateProduct') {
 
             $request->validate([
                 'name' => 'required|string|max:255',
@@ -174,6 +200,63 @@ class productController extends Controller
         ]);
 
         return back()->with('success', 'Produk berhasil ditambahkan ke outlet.');
+    }
+
+    public function storeVarian(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|integer|exists:products,id',
+            'name' => 'required|string|max:15',
+        ], [
+            'product_id.required' => 'Produk wajib dipilih.',
+            'product_id.exists' => 'Produk tidak ditemukan.',
+
+            'name.required' => 'Nama varian wajib diisi.',
+            'name.string' => 'Nama varian harus berupa teks.',
+            'name.max' => 'Nama varian tidak boleh lebih dari 15 karakter.',
+        ]);
+
+        // Ambil produk
+        $cek = products::findOrFail($request->product_id);
+
+        // Ambil nama produk dan input varian
+        $productName = trim($cek->name);
+        $name = trim($request->name);
+
+        // Hapus unsur nama produk dari input
+        $name = trim(str_ireplace($productName, '', $name));
+
+        // Pastikan nama varian tidak kosong
+        if ($name === '') {
+            return back()->with('error', 'Nama varian tidak boleh kosong.');
+        }
+
+        // Cek varian yang sudah ada
+        $existingVarian = productVarian::where('product_id', $request->product_id)
+            ->where('name', $name)
+            ->first();
+
+        if ($existingVarian) {
+            return back()->with('error', 'Varian sudah ada untuk produk ini.');
+        }
+
+        // Simpan varian
+        $varian = productVarian::create([
+            'product_id' => $request->product_id,
+            'name' => $name,
+        ]);
+
+        if($varian){
+            productDetail::create([
+                'product_id' => $request->product_id,
+                'product_varian_id' => $varian->id,
+                'outlet_id' => $request->outlet_id,
+                'stock' => $request->stock ?? 0, 
+                'price' => $request->price ?? 0, 
+            ]);
+        }
+
+        return back()->with('success', 'Varian berhasil ditambahkan.');
     }
 
     private function cekProductByOutlet($productId, $outletId)

@@ -7,6 +7,7 @@ use App\Models\category;
 use App\Models\outlet;
 use App\Models\productDetail;
 use App\Models\products;
+use App\Models\productVarian;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -17,68 +18,59 @@ class outletController extends Controller
         $outlets = outlet::latest()->get();
         return view('admin.outlet', compact('outlets'));
     }
-    public function show(Request $request,$uuid){
-        
-        // $outlet = products::with(['outlet', 'category'])
-        //     ->whereHas('outlet', function ($query) use ($uuid) {
-        //         $query->where('uuid', $uuid);
-        //     })
-        //     ->when($request->search, function ($query) use ($request) {
-        //         $query->where('name', 'like', '%' . $request->search . '%');
-        //     })
-        //     ->when($request->category, function ($query) use ($request) {
-        //         $query->where('category_id', $request->category);
-        //     })
-        //     ->latest()
-        //     ->paginate(10)
-        //     ->withQueryString();
-        
-        $categories = category::all();
+    
+public function show(Request $request, $uuid)
+{
+    $categories = category::all();
 
-        $outlet = outlet::where('uuid', $uuid)->firstOrFail();
+    $outlet = outlet::where('uuid', $uuid)->firstOrFail();
 
-        $products = $outlet->productDetails()
-            ->with('product.category')
-            ->when($request->search, function ($query) use ($request) {
-                $query->whereHas('product', function ($q) use ($request) {
-                    $q->where('name', 'like', '%' . $request->search . '%');
-                });
-            })
-            ->when($request->category, function ($query) use ($request) {
-                $query->whereHas('product', function ($q) use ($request) {
-                    $q->where('category_id', $request->category);
-                });
-            })
-            ->latest()
-            ->paginate(10)
-            ->withQueryString()
-            ->through(function ($detail) {
-                $product = $detail->product;
+    // Ambil ID produk unik yang tersedia di outlet ini
+    $productIds = productDetail::where('outlet_id', $outlet->id)
+        ->select('product_id')
+        ->distinct()
+        ->pluck('product_id');
 
-                $product->stock = $detail->stock;
+    // Tampilkan produk unik, bukan baris product_details
+    $products = products::with('category')
+        ->whereIn('id', $productIds)
+        ->when($request->search, function ($query) use ($request) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        })
+        ->when($request->category, function ($query) use ($request) {
+            $query->where('category_id', $request->category);
+        })
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
 
-                return $product;
-            });
+    // Ambil seluruh detail produk untuk produk yang tampil di halaman ini
+    $detailsByProduct = productDetail::with('varians')
+        ->where('outlet_id', $outlet->id)
+        ->whereIn('product_id', $products->pluck('id'))
+        ->get()
+        ->groupBy('product_id');
 
-        $availableProducts = products::with('category')
-            ->when($request->search, function ($query) use ($request) {
-                $query->where('name', 'like', '%' . $request->search . '%');
-            })
-            ->when($request->category, function ($query) use ($request) {
-                $query->where('category_id', $request->category);
-            })
-            ->paginate(10)
-            ->withQueryString();
+    // Produk yang belum pernah ditambahkan ke outlet
+    $availableProducts = products::with('category')
+        ->whereNotIn('id', $productIds)
+        ->when($request->search, function ($query) use ($request) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        })
+        ->when($request->category, function ($query) use ($request) {
+            $query->where('category_id', $request->category);
+        })
+        ->paginate(10)
+        ->withQueryString();
 
-        return view('admin.products', compact(
-            'categories',
-            'outlet',
-            'products',
-            'availableProducts'
-        ));
-
-        return $products;
-    }
+    return view('admin.products', compact(
+        'categories',
+        'outlet',
+        'products',
+        'detailsByProduct',
+        'availableProducts'
+    ));
+}
 
     public function showOutletByProduct($id)
     {
