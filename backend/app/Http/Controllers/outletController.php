@@ -57,50 +57,22 @@ class outletController extends Controller
     return response()->json($category);
 }
 
+    
     public function showProductByOutlet(Request $request, $outlet_id = null)
     {
-        
-        // Tentukan outlet_id berdasarkan role
-        // if ($user->role === 'kasir') {
-        //     $outlet_id = $user->outlet_id;
-        // }
-
-        // if (!$outlet_id) {
-        //     return response()->json([
-        //         'message' => 'Outlet is not available',
-        //     ], 400);
-        // }
-
-        // // Bedakan cache key jika struktur kolom yang diambil berbeda
-        // $cacheKey = "product_outlet_{$outlet_id}_role_{$user->role}";
-
-        // $product = Cache::remember($cacheKey, 600, function () use ($outlet_id, $user) {
-        //     $selectFields = ($user->role === 'kasir') 
-        //         ? ['id', 'name'] 
-        //         : ['id', 'name', 'address'];
-
-        //     return $this->outlet->select($selectFields)
-        //         ->with(['products' => function ($query) {
-            //             // Pilih kolom spesifik & bisa tambahkan filter/limit jika perlu
-            //             $query->select('id', 'outlet_id', 'name', 'price', 'stock', 'image');
-        //         }])
-        //         ->get(); // Gunakan find() karena query berdasarkan ID unik (mengembalikan 1 object, bukan collection)
-        // });
-
-        // if (!$product) {
-        //     return response()->json([
-        //         'message' => 'Outlet not found',
-        //     ], 404);
-        // }
         $user = $request->user();
+
         $outlet_id = $user->outlet_id;
-        //$product = Cache::remember('product_outlet_'.$outlet_id,now()->addMinutes(5),function() use ($outlet_id){ -->
-            $product = products::where('outlet_id', $outlet_id)
-            ->select('id', 'outlet_id','category_id', 'name', 'price', 'stock', 'image')
-            ->get()
-            ->toArray();
-            //return $product;
-        //});
+
+        $product = products::with([
+            'productDetails' => function ($query) use ($outlet_id) {
+                $query->where('outlet_id', $outlet_id)
+                    ->with('varians');
+            }
+        ])
+        ->select('id', 'category_id', 'name', 'image')
+        ->get();
+
         return response()->json($product);
     }
 
