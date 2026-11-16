@@ -619,11 +619,19 @@
 
 
 <style>
-
+    /* ==============================
+       HALAMAN OUTLET
+    ============================== */
     .outlet-page {
-        padding-bottom: 30px;
+        width: 100%;
+        max-width: 100%;
+        padding: 0 12px 30px;
+        box-sizing: border-box;
     }
 
+    /* ==============================
+       LINK & CARD OUTLET
+    ============================== */
     .outlet-link {
         display: block;
         height: 100%;
@@ -632,6 +640,7 @@
     }
 
     .outlet-card {
+        height: 100%;
         border-radius: 16px;
         background: #fff;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
@@ -644,9 +653,23 @@
         box-shadow: 0 10px 28px rgba(0, 0, 0, 0.09);
     }
 
+    .outlet-card .card-body {
+        padding: 24px;
+        min-width: 0;
+    }
+
+    .outlet-card h5 {
+        overflow-wrap: anywhere;
+    }
+
+    .outlet-card p {
+        overflow-wrap: anywhere;
+    }
+
     .outlet-icon {
         width: 52px;
         height: 52px;
+        min-width: 52px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -670,6 +693,7 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 10px;
         padding-top: 15px;
         border-top: 1px solid #f0f0f0;
         color: #0d6efd;
@@ -677,31 +701,243 @@
         font-weight: 600;
     }
 
+    /* ==============================
+       EMPTY OUTLET
+    ============================== */
     .empty-outlet {
         background: #fff;
         border-radius: 16px;
         border: 1px dashed #dee2e6;
+        overflow-wrap: anywhere;
     }
 
+    /* ==============================
+       INFORMASI PRODUK
+    ============================== */
     .card-body-product {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .card-body-product > div:first-child {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .card-body-product img {
+        flex-shrink: 0;
+        max-width: 100%;
+    }
+
+    .card-body-product h5,
+    .card-body-product p {
+        overflow-wrap: anywhere;
+    }
+
+    /* ==============================
+       BUTTON
+    ============================== */
+    .button {
+        max-width: 100%;
     }
 
     .button button {
         border: none;
-        padding: 10px;
+        padding: 10px 14px;
         border-radius: 10px;
         background-color: rgb(57, 126, 253);
         color: white;
         font-weight: bold;
+        max-width: 100%;
+        white-space: normal;
+        overflow-wrap: anywhere;
     }
 
     .button button:hover {
         background-color: rgb(35, 105, 235);
     }
 
-</style>
+    /* ==============================
+       MODAL
+    ============================== */
+    .modal-dialog {
+        width: auto;
+        max-width: 500px;
+        margin: 1.75rem auto;
+    }
 
+    .modal-content {
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        min-width: 0;
+    }
+
+    .modal-footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .modal-footer button {
+        white-space: normal;
+    }
+
+    /* ==============================
+       TABLET
+    ============================== */
+    @media (max-width: 991.98px) {
+        .outlet-page {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        .outlet-card .card-body {
+            padding: 20px;
+        }
+
+        .card-body-product {
+            gap: 15px;
+        }
+    }
+
+    /* ==============================
+       MOBILE
+    ============================== */
+    @media (max-width: 575.98px) {
+        .outlet-page {
+            padding: 0 8px 20px;
+        }
+
+        /* Header halaman */
+        .outlet-page > .d-flex:first-child {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 15px;
+        }
+
+        .outlet-page > .d-flex:first-child h3 {
+            font-size: 22px;
+        }
+
+        .outlet-page > .d-flex:first-child > div:last-child {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .outlet-page > .d-flex:first-child .btn {
+            flex: 1;
+        }
+
+        /* Card outlet */
+        .outlet-card .card-body {
+            padding: 18px;
+        }
+
+        .outlet-card h5 {
+            font-size: 17px;
+        }
+
+        .outlet-icon {
+            width: 45px;
+            height: 45px;
+            min-width: 45px;
+            font-size: 22px;
+        }
+
+        .outlet-footer {
+            font-size: 12px;
+        }
+
+        /* Informasi produk */
+        .card-body-product {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .card-body-product > div:first-child {
+            width: 100%;
+        }
+
+        .card-body-product h5 {
+            font-size: 16px;
+        }
+
+        .button {
+            width: 100%;
+        }
+
+        .button button {
+            width: 100%;
+            font-size: 13px;
+        }
+
+        /* Modal */
+        .modal-dialog {
+            max-width: none;
+            width: auto;
+            margin: 10px;
+        }
+
+        .modal-header {
+            padding: 15px;
+        }
+
+        .modal-body {
+            padding: 15px;
+        }
+
+        .modal-footer {
+            padding: 12px 15px;
+        }
+
+        .modal-footer button {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .modal-title {
+            font-size: 17px;
+        }
+    }
+
+    /* ==============================
+       HP KECIL
+    ============================== */
+    @media (max-width: 375px) {
+        .outlet-page > .d-flex:first-child h3 {
+            font-size: 20px;
+        }
+
+        .outlet-card .card-body {
+            padding: 14px;
+        }
+
+        .card-body-product img {
+            width: 50px !important;
+            height: 50px !important;
+        }
+
+        .card-body-product h5 {
+            font-size: 14px;
+        }
+
+        .modal-footer button {
+            width: 100%;
+            flex: 1 1 100%;
+        }
+    }
+</style>
 @endsection

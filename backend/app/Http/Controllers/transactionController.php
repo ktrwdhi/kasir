@@ -30,7 +30,8 @@ class transactionController extends Controller
 
                 foreach ($request->items as $item) {
 
-                    $product = products::find($item['id']);
+                    $product = products::with('productDetails')->find($item['id']);
+                    $stock = $product->productDetails->stock;
 
                     if (!$product) {
                         throw new \Exception(
@@ -38,7 +39,7 @@ class transactionController extends Controller
                         );
                     }
 
-                    if ($product->stock < $item['qty']) {
+                    if ($stock < $item['qty']) {
                         throw new \Exception(
                             "Stok {$product->name} tidak mencukupi."
                         );
@@ -69,7 +70,8 @@ class transactionController extends Controller
                 // =========================
                 foreach ($request->items as $item) {
 
-                    $product = products::find($item['id']);
+                    $product = products::with('productDetails')->find($item['id']);
+                    $stock = $product->productDetails->stock;
 
                     sale_detail::create([
                         'sale_id' => $sale->id,
