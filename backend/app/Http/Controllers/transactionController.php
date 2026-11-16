@@ -82,7 +82,7 @@ class transactionController extends Controller
                     ]);
 
                     // Kurangi stok
-                    $product->decrement('stock', $item['qty']);
+                    $product->productDetails->decrement('stock', $item['qty']);
                     
                 }
 
