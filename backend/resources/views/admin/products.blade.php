@@ -1150,4 +1150,160 @@
 
 @endif
 
+<style>
+/* ================================
+   RESPONSIVE HALAMAN PRODUK
+================================ */
+
+/* Search dan kategori */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 15px !important;
+    }
+
+    .row.g-3.mb-4 {
+        gap: 10px !important;
+    }
+
+    .row.g-3.mb-4 .col-md-6,
+    .row.g-3.mb-4 .col-md-4 {
+        width: 100%;
+    }
+
+    /* Header produk */
+    .d-flex.justify-content-between.align-items-center.mb-4 {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 15px;
+    }
+
+    .d-flex.justify-content-between.align-items-center.mb-4 h3 {
+        font-size: 20px;
+    }
+
+    /* Tombol header */
+    .d-flex.flex-wrap.gap-2 {
+        width: 100%;
+    }
+
+    .d-flex.flex-wrap.gap-2 .btn {
+        flex: 1 1 auto;
+        font-size: 13px;
+    }
+
+    /* Tabel */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table {
+        min-width: 750px;
+    }
+
+    .table th,
+    .table td {
+        white-space: nowrap;
+        font-size: 13px;
+        padding: 10px;
+    }
+
+    /* Info produk */
+    .table td .fw-bold.fs-6 {
+        font-size: 14px !important;
+    }
+
+    /* Tombol aksi */
+    .table td .d-flex.justify-content-center.gap-1 {
+        flex-wrap: wrap;
+        justify-content: flex-start !important;
+        min-width: 180px;
+    }
+
+    .table td .btn {
+        font-size: 12px;
+        padding: 5px 8px;
+    }
+
+    /* Gambar */
+    .table img {
+        width: 45px !important;
+        height: 45px !important;
+    }
+
+    /* Pagination */
+    .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    /* Modal */
+    .modal-dialog {
+        margin: 10px;
+    }
+
+    .modal-content {
+        border-radius: 12px;
+    }
+
+    .modal-body {
+        padding: 15px;
+    }
+
+    .modal-footer {
+        flex-wrap: wrap;
+    }
+
+    .modal-footer .btn {
+        flex: 1;
+    }
+}
+
+/* Tablet */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .card-body {
+        padding: 20px !important;
+    }
+
+    .table th,
+    .table td {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .table td .btn {
+        padding: 5px 8px;
+    }
+}
+
+/* HP kecil */
+@media (max-width: 480px) {
+    .d-flex.justify-content-between.align-items-center.mb-4 h3 {
+        font-size: 18px;
+    }
+
+    .d-flex.flex-wrap.gap-2 .btn {
+        font-size: 11px;
+        padding: 8px;
+    }
+
+    .card-body {
+        padding: 10px !important;
+    }
+
+    .modal-title {
+        font-size: 16px;
+    }
+
+    .modal-body label {
+        font-size: 13px;
+    }
+
+    .modal-body .form-control,
+    .modal-body .form-select {
+        font-size: 14px;
+    }
+}
+</style>
+
 @endsection
