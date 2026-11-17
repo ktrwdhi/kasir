@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\admin\authController;
+use App\Http\Controllers\admin\categoryController;
 use App\Http\Controllers\admin\dashboardController;
 use App\Http\Controllers\admin\outletController;
 use App\Http\Controllers\admin\productController;
@@ -32,4 +33,6 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::put('/outlet/{id}',[outletController::class,'update'])->name('outlet.update');
     Route::delete('/outlet/{id}',[outletController::class,'delete'])->name('outlet.delete');
     Route::delete('/product/{id}',[productController::class,'delete'])->name('products.delete');
+    Route::resource('categories', categoryController::class)
+    ->names('categories');
 });

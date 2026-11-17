@@ -283,6 +283,12 @@
             Produk
         </a>
 
+        <a href="{{ route('admin.categories.index') }}"
+            class="{{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
+            <i class="bi bi-tags"></i>
+            Kategori
+        </a>
+
         @if (Auth()->user()->role == "owner")    
             <a href="{{ route('admin.outlet.index') }}"
                 class="{{ request()->routeIs('admin.outlet.index') ? 'active' : '' }}">
