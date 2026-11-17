@@ -283,11 +283,13 @@
             Produk
         </a>
 
-        <a href="{{ route('admin.outlet.index') }}"
-            class="{{ request()->routeIs('admin.outlet.index') ? 'active' : '' }}">
-            <i class="bi bi-shop"></i>
-            <span>Outlet</span>
-        </a>
+        @if (Auth()->user()->role == "owner")    
+            <a href="{{ route('admin.outlet.index') }}"
+                class="{{ request()->routeIs('admin.outlet.index') ? 'active' : '' }}">
+                <i class="bi bi-shop"></i>
+                <span>Outlet</span>
+            </a>
+        @endif
 
         <a href="{{ route('admin.transactions.index') }}"
             class="{{ request()->routeIs('admin.transactions.*') ? 'active' : '' }}">

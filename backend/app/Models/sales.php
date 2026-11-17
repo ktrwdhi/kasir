@@ -20,4 +20,9 @@ class sales extends Model
     public function outlet(){
         return $this->belongsTo(outlet::class,'outlet_id');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

@@ -25,7 +25,7 @@
                 <i class="bi bi-pencil me-1"></i> Edit Outlet
             </button>
 
-            <form action="" method="POST" onsubmit="return confirm('Yakin ingin menghapus outlet ini?')">
+            <form action="{{ route('admin.outlet.delete',$outlet->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus outlet ini?')">
                 @csrf
                 @method('DELETE')
 
@@ -1046,7 +1046,7 @@
         id="editOutletModal"
         title="Edit Outlet"
         :is-form="true"
-        action=""
+        action="{{ route('admin.outlet.update',$outlet->id) }}"
         form-method="PUT"
     >
         <div class="mb-3">

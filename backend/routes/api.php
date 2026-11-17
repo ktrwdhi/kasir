@@ -14,9 +14,9 @@ Route::get('/user', function (Request $request) {
 Route::post('/login', [authController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function(){
+    Route::get('/products', [outletController::class, 'showProductByOutlet']);
     Route::get('/outlet', [outletController::class, 'index']);
     Route::get('/category',[outletController::class, 'getCategory']);
-    Route::get('/products/{id?}', [outletController::class, 'showProductByOutlet']);
     Route::post('/payment/qris', [paymentController::class, 'qris']);
     Route::post('/sales',[transactionController::class ,'transaction']);
 });

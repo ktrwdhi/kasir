@@ -120,4 +120,29 @@ public function show(Request $request, $uuid)
             ->back()
             ->with('success', 'Outlet berhasil ditambahkan!');
     }
+
+    public function update(Request $request, $id)
+{
+    $outlet = Outlet::findOrFail($id);
+
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'address' => 'required|string|max:255',
+    ]);
+
+    $outlet->update($validated);
+
+    return redirect()->back()
+        ->with('success', 'Outlet berhasil diperbarui.');
+}
+
+public function delete($id)
+{
+    $outlet = Outlet::findOrFail($id);
+
+    $outlet->delete();
+
+    return redirect()->route('admin.outlet.index')
+        ->with('success', 'Outlet berhasil dihapus.');
+}
 }

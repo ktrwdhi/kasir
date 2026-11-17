@@ -135,13 +135,11 @@ class productController extends Controller
             $request->validate([
                 'name' => 'required|string|max:255',
                 'category_id' => 'required|exists:categories,id',
-                'price' => 'required|numeric|min:0'
             ]);
 
             $product->update([
                 'name' => $request->name,
                 'category_id' => $request->category_id,
-                'price' => $request->price
             ]);
 
         } else {

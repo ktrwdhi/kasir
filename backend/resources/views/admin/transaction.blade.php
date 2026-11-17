@@ -255,14 +255,14 @@
                                 {{-- Pembayaran --}}
                                 <td>
 
-                                    @if(strtolower($transaction->payment_method) == 'qris')
+                                    @if(strtolower($transaction->payment) == 'qris')
 
                                         <span class="badge bg-primary">
                                             <i class="bi bi-qr-code me-1"></i>
                                             QRIS
                                         </span>
 
-                                    @elseif(strtolower($transaction->payment_method) == 'cash')
+                                    @elseif(strtolower($transaction->payment) == 'cash')
 
                                         <span class="badge bg-success">
                                             <i class="bi bi-cash me-1"></i>
@@ -272,7 +272,7 @@
                                     @else
 
                                         <span class="badge bg-secondary">
-                                            {{ $transaction->payment_method ?? '-' }}
+                                            {{ $transaction->payment ?? '-' }}
                                         </span>
 
                                     @endif

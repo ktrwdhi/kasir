@@ -9,6 +9,7 @@ class sale_detail extends Model
     protected $fillable = [
         'sale_id',
         'product_id',
+        'product_varian_id',
         'quantity',
         'price',
         'subtotal'

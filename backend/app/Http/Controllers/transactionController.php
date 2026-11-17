@@ -2,202 +2,179 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\productDetail;
 use App\Models\products;
 use App\Models\sale_detail;
 use App\Models\sales;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class transactionController extends Controller
 {
-    
-    public function transaction(Request $request)
+    public function index()
     {
-        $request->validate([
-            'items' => 'required|array|min:1',
-            'items.*.id' => 'required|integer|min:1',
-            'items.*.qty' => 'required|integer|min:1',
-            'items.*.variant_id' => 'nullable|integer|min:1',
-            'payment' => 'required|in:cash,qris',
-            'cash' => 'required|numeric|min:0',
-            'change' => 'nullable|numeric|min:0',
-        ]);
+        $user = Auth::user();
+        $query = sales::with(['user', 'outlet'])
+            ->latest();
 
-        try {
+        // Admin hanya melihat transaksi outlet sendiri
+        if ($user->role === 'admin') {
+            $query->where('outlet_id', $user->outlet_id);
+        }
 
-            $sale = DB::transaction(function () use ($request) {
+        // Owner dapat melihat seluruh transaksi
+        $transactions = $query->paginate(10);
 
-                $total = 0;
-                $user = $request->user();
-                $outlet_id = $user->outlet_id;
+        return view('admin.transactions.index', compact('transactions'));
+    }
+    
+public function transaction(Request $request)
+{
+    $validated = $request->validate([
+        'items' => 'required|array|min:1',
+        'items.*.product_detail_id' => 'required|integer|min:1',
+        'items.*.qty' => 'required|integer|min:1',
+        'payment' => 'required|in:cash,qris',
+        'cash' => 'required|numeric|min:0',
+        'change' => 'nullable|numeric|min:0',
+    ]);
 
-                if (!$outlet_id) {
+    try {
+        $sale = DB::transaction(function () use ($request, $validated) {
+
+            $total = 0;
+            $user = $request->user();
+            $outletId = $user->outlet_id;
+
+            if (!$outletId) {
+                throw new \Exception(
+                    'User belum terhubung dengan outlet.'
+                );
+            }
+
+            $itemsData = [];
+
+            // CEK DETAIL PRODUK DAN STOK
+            foreach ($validated['items'] as $item) {
+
+                // Cari detail produk berdasarkan ID dan outlet
+                $detail = productDetail::with('product')
+                    ->where('id', $item['product_detail_id'])
+                    ->where('outlet_id', $outletId)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$detail) {
                     throw new \Exception(
-                        'User belum terhubung dengan outlet.'
+                        "Detail produk dengan ID {$item['product_detail_id']} tidak ditemukan di outlet."
                     );
                 }
 
-                $itemsData = [];
+                $product = $detail->product;
 
-                // =========================
-                // CEK PRODUK DAN STOK
-                // =========================
-
-                foreach ($request->items as $item) {
-
-                    $product = products::find($item['id']);
-
-                    if (!$product) {
-                        throw new \Exception(
-                            "Produk dengan ID {$item['id']} tidak ditemukan."
-                        );
-                    }
-
-                    // Ambil detail produk berdasarkan outlet
-                    $detailQuery = $product->productDetails()
-                        ->where('outlet_id', $outlet_id)
-                        ->lockForUpdate();
-
-                    // Jika menggunakan varian
-                    if (!empty($item['variant_id'])) {
-
-                        $detailQuery->where(
-                            'product_varian_id',
-                            $item['variant_id']
-                        );
-
-                    } else {
-
-                        // Produk non-varian
-                        $detailQuery->whereNull(
-                            'product_varian_id'
-                        );
-
-                    }
-
-                    $detail = $detailQuery->first();
-
-                    if (!$detail) {
-                        throw new \Exception(
-                            "Detail produk {$product->name} tidak ditemukan di outlet."
-                        );
-                    }
-
-                    // Cek stok
-                    if ($detail->stock < $item['qty']) {
-                        throw new \Exception(
-                            "Stok {$product->name} tidak mencukupi."
-                        );
-                    }
-
-                    // Ambil harga dari database
-                    $price = $detail->price;
-
-                    // Hitung subtotal
-                    $subtotal = $price * $item['qty'];
-
-                    $total += $subtotal;
-
-                    $itemsData[] = [
-                        'product' => $product,
-                        'detail' => $detail,
-                        'quantity' => $item['qty'],
-                        'price' => $price,
-                        'subtotal' => $subtotal,
-                    ];
+                if (!$product) {
+                    throw new \Exception(
+                        'Data produk tidak ditemukan.'
+                    );
                 }
 
-                // =========================
-                // CEK PEMBAYARAN
-                // =========================
+                // CEK STOK
+                if ($detail->stock < $item['qty']) {
+                    throw new \Exception(
+                        "Stok {$product->name} tidak mencukupi."
+                    );
+                }
 
-                $cash = $request->cash;
+                // AMBIL HARGA DARI PRODUCT DETAILS
+                $price = $detail->price;
+
+                $subtotal = $price * $item['qty'];
+
+                $total += $subtotal;
+
+                $itemsData[] = [
+                    'product_id' => $product->id,
+                    'product_varian_id' => $detail->product_varian_id,
+                    'detail' => $detail,
+                    'quantity' => $item['qty'],
+                    'price' => $price,
+                    'subtotal' => $subtotal,
+                ];
+            }
+
+            // CEK PEMBAYARAN
+            $cash = $request->cash;
+            $change = 0;
+
+            if ($request->payment == 'cash') {
+
+                if ($cash < $total) {
+                    throw new \Exception(
+                        'Uang pembayaran tidak mencukupi.'
+                    );
+                }
+
+                $change = $cash - $total;
+
+            } elseif ($request->payment == 'qris') {
+
+                $cash = $total;
                 $change = 0;
+            }
 
-                if ($request->payment == 'cash') {
+            // GENERATE INVOICE
+            $invoice = 'INV-' .
+                now()->format('YmdHis') .
+                '-' .
+                strtoupper(substr(uniqid(), -4));
 
-                    if ($cash < $total) {
-                        throw new \Exception(
-                            'Uang pembayaran tidak mencukupi.'
-                        );
-                    }
+            // SIMPAN TRANSAKSI
+            $sale = sales::create([
+                'user_id' => $user->id,
+                'outlet_id' => $outletId,
+                'invoice' => $invoice,
+                'total' => $total,
+                'payment' => $request->payment,
+                'cash' => $cash,
+                'change' => $change,
+            ]);
 
-                    $change = $cash - $total;
+            // SIMPAN DETAIL TRANSAKSI DAN KURANGI STOK
+            foreach ($itemsData as $data) {
 
-                } elseif ($request->payment == 'qris') {
-
-                    $cash = $total;
-                    $change = 0;
-
-                }
-
-                // =========================
-                // GENERATE INVOICE
-                // =========================
-
-                $invoice = 'INV-' .
-                    now()->format('YmdHis') .
-                    '-' .
-                    strtoupper(substr(uniqid(), -4));
-
-                // =========================
-                // SIMPAN TRANSAKSI
-                // =========================
-
-                $sale = sales::create([
-                    'user_id' => $user->id,
-                    'outlet_id' => $outlet_id,
-                    'invoice' => $invoice,
-                    'total' => $total,
-                    'payment' => $request->payment,
-                    'cash' => $cash,
-                    'change' => $change,
+                sale_detail::create([
+                    'sale_id' => $sale->id,
+                    'product_id' => $data['product_id'],
+                    'product_varian_id' => $data['product_varian_id'],
+                    'quantity' => $data['quantity'],
+                    'price' => $data['price'],
+                    'subtotal' => $data['subtotal'],
                 ]);
 
-                // =========================
-                // SIMPAN DETAIL + KURANGI STOK
-                // =========================
+                $data['detail']->decrement(
+                    'stock',
+                    $data['quantity']
+                );
+            }
 
-                foreach ($itemsData as $data) {
+            return $sale;
+        });
 
-                    $product = $data['product'];
-                    $detail = $data['detail'];
+        return response()->json([
+            'success' => true,
+            'message' => 'Transaksi berhasil disimpan.',
+            'data' => $sale,
+        ], 201);
 
-                    sale_detail::create([
-                        'sale_id' => $sale->id,
-                        'product_id' => $product->id,
-                        'quantity' => $data['quantity'],
-                        'price' => $data['price'],
-                        'subtotal' => $data['subtotal'],
-                    ]);
+    } catch (\Exception $e) {
 
-                    // Kurangi stok detail produk outlet
-                    $detail->decrement(
-                        'stock',
-                        $data['quantity']
-                    );
-                }
-
-                return $sale;
-            });
-
-            // =========================
-            // RESPONSE SUKSES
-            // =========================
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Transaksi berhasil disimpan.',
-                'data' => $sale,
-            ], 201);
-
-        } catch (\Exception $e) {
-
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ], 400);
-        }
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage(),
+        ], 400);
     }
+}
+
 
 }

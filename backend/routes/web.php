@@ -29,4 +29,6 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/users', [userController::class,'index'])->name('users.index');
     Route::post('/varian/store',[productController::class,'storeVarian'])->name('varian.store');
     Route::post('/users',[userController::class,'store'])->name('users.store');
+    Route::put('/outlet/{id}',[outletController::class,'update'])->name('outlet.update');
+    Route::delete('/outlet/{id}',[outletController::class,'delete'])->name('outlet.delete');
 });
