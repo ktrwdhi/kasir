@@ -277,7 +277,7 @@
                                     </button>
 
                                     <form
-                                        action=""
+                                        action="{{ route('admin.products.delete',$product['id']) }}"
                                         method="POST"
                                         class="d-inline"
                                         onsubmit="return confirm('Yakin ingin menghapus produk ini?')"

@@ -263,4 +263,30 @@ class productController extends Controller
             ->where('outlet_id', $outletId)
             ->exists();
     }
+
+    public function delete($id)
+    {
+        $product = products::with(['varians', 'productDetails'])
+            ->findOrFail($id);
+
+        DB::transaction(function () use ($product) {
+
+            // Hapus semua detail produk
+            $product->productDetails()->delete();
+
+            // Hapus semua varian produk
+            $product->varians()->delete();
+
+            // Hapus gambar produk
+            if ($product->image) {
+                Storage::disk('public')->delete($product->image);
+            }
+
+            // Hapus produk utama
+            $product->delete();
+        });
+
+        return redirect()->back()
+            ->with('success', 'Produk beserta varian dan detail berhasil dihapus.');
+    }
 }
