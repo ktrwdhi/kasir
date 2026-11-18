@@ -160,5 +160,47 @@ class userController extends Controller
         return back()
             ->with('success', 'Profil user berhasil diperbarui.');
     }
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
 
+        $currentUser = Auth::user();
+
+        // Tidak boleh menghapus akun sendiri
+        if ($currentUser->id === $user->id) {
+            return back()->with('error', 'Kamu tidak bisa menghapus akun sendiri.');
+        }
+
+        // Akun owner tidak boleh dihapus
+        if ($user->role === 'owner') {
+            abort(403, 'Akun owner tidak dapat dihapus.');
+        }
+
+        // Jika yang login adalah owner
+        if ($currentUser->role === 'owner') {
+
+            $user->delete();
+
+            return back()->with('success', 'User berhasil dihapus.');
+
+        }
+
+        // Jika yang login adalah admin
+        if ($currentUser->role === 'admin') {
+
+            // Admin hanya boleh menghapus kasir di outlet sendiri
+            if (
+                $user->role !== 'kasir' ||
+                $user->outlet_id !== $currentUser->outlet_id
+            ) {
+                abort(403, 'Kamu tidak memiliki akses menghapus user ini.');
+            }
+
+            $user->delete();
+
+            return back()->with('success', 'User berhasil dihapus.');
+        }
+
+        abort(403, 'Kamu tidak memiliki akses untuk menghapus user.');
+    }
 }

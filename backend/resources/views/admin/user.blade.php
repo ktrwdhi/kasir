@@ -9,20 +9,33 @@
 
 <div class="container-fluid">
 
+    {{-- Notifikasi --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle me-2"></i>
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-circle me-2"></i>
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     {{-- Statistik --}}
     <div class="row g-4 mb-4">
 
         <div class="col-md-6">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
-
                     <div class="d-flex justify-content-between align-items-center">
 
                         <div>
-                            <p class="text-muted mb-1">
-                                Total Users
-                            </p>
-
+                            <p class="text-muted mb-1">Total Users</p>
                             <h3 class="fw-bold mb-0">
                                 {{ number_format($totalUsers) }}
                             </h3>
@@ -33,7 +46,6 @@
                         </div>
 
                     </div>
-
                 </div>
             </div>
         </div>
@@ -41,26 +53,17 @@
         <div class="col-md-6">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
-
                     <div class="d-flex justify-content-between align-items-center">
 
                         <div>
-                            <p class="text-muted mb-1">
-                                Outlet
-                            </p>
+                            <p class="text-muted mb-1">Outlet</p>
 
                             <h3 class="fw-bold mb-0">
-
                                 @if(Auth::user()->role === 'owner')
-
                                     Semua Outlet
-
                                 @else
-
                                     {{ Auth::user()->outlet->name ?? '-' }}
-
                                 @endif
-
                             </h3>
                         </div>
 
@@ -69,7 +72,6 @@
                         </div>
 
                     </div>
-
                 </div>
             </div>
         </div>
@@ -81,7 +83,6 @@
 
         {{-- Header --}}
         <div class="card-header bg-white py-3">
-
             <div class="d-flex justify-content-between align-items-center">
 
                 <div>
@@ -94,19 +95,20 @@
                         Daftar pengguna berdasarkan outlet
                     </small>
                 </div>
+
                 <button type="button"
-                    class="btn btn-primary"
-                    data-bs-toggle="modal"
-                    data-bs-target="#addUserModal">
+                        class="btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#addUserModal">
 
-                <i class="bi bi-person-plus me-1"></i>
-                Tambah User
+                    <i class="bi bi-person-plus me-1"></i>
+                    Tambah User
 
-            </button>
+                </button>
+
             </div>
-
         </div>
-    
+
         <div class="card-body">
 
             {{-- Filter --}}
@@ -130,22 +132,17 @@
 
                     <div class="col-md-3">
 
-                        <select name="outlet_id"
-                                class="form-select">
+                        <select name="outlet_id" class="form-select">
 
-                            <option value="">
-                                Semua Outlet
-                            </option>
+                            <option value="">Semua Outlet</option>
 
                             @foreach($outlets as $outlet)
-
                                 <option value="{{ $outlet->id }}"
                                     {{ request('outlet_id') == $outlet->id ? 'selected' : '' }}>
 
                                     {{ $outlet->name }}
 
                                 </option>
-
                             @endforeach
 
                         </select>
@@ -157,12 +154,9 @@
                 {{-- Filter Role --}}
                 <div class="{{ Auth::user()->role === 'owner' ? 'col-md-2' : 'col-md-3' }}">
 
-                    <select name="role"
-                            class="form-select">
+                    <select name="role" class="form-select">
 
-                        <option value="">
-                            Semua Role
-                        </option>
+                        <option value="">Semua Role</option>
 
                         <option value="owner"
                             {{ request('role') == 'owner' ? 'selected' : '' }}>
@@ -186,12 +180,9 @@
                 {{-- Tombol --}}
                 <div class="col-md-2 d-flex gap-2">
 
-                    <button type="submit"
-                            class="btn btn-primary w-100">
-
+                    <button type="submit" class="btn btn-primary w-100">
                         <i class="bi bi-search"></i>
                         Cari
-
                     </button>
 
                     <a href="{{ route('admin.users.index') }}"
@@ -219,6 +210,7 @@
                             <th>Outlet</th>
                             <th>Role</th>
                             <th>Dibuat</th>
+                            <th>Aksi</th>
                         </tr>
 
                     </thead>
@@ -236,7 +228,6 @@
 
                                 {{-- Nama --}}
                                 <td>
-
                                     <div class="d-flex align-items-center">
 
                                         <div class="rounded-circle bg-primary bg-opacity-10 text-primary
@@ -252,7 +243,6 @@
                                         </span>
 
                                     </div>
-
                                 </td>
 
                                 {{-- Username --}}
@@ -262,13 +252,9 @@
 
                                 {{-- Outlet --}}
                                 <td>
-
                                     <span class="badge bg-light text-dark border">
-
                                         {{ $user->outlet->name ?? '-' }}
-
                                     </span>
-
                                 </td>
 
                                 {{-- Role --}}
@@ -304,8 +290,47 @@
 
                                 {{-- Tanggal --}}
                                 <td>
-
                                     {{ $user->created_at->format('d/m/Y') }}
+                                </td>
+
+                                {{-- Aksi --}}
+                                <td>
+
+                                    @if(
+                                        Auth::id() !== $user->id &&
+                                        $user->role !== 'owner' &&
+                                        (
+                                            Auth::user()->role === 'owner' ||
+                                            (
+                                                Auth::user()->role === 'admin' &&
+                                                $user->role === 'kasir' &&
+                                                (int) $user->outlet_id === (int) Auth::user()->outlet_id
+                                            )
+                                        )
+                                    )
+
+                                        <form action="{{ route('admin.users.destroy', $user->id) }}"
+                                              method="POST"
+                                              onsubmit="return confirm('Yakin ingin menghapus user {{ $user->name }}?')">
+
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-danger">
+
+                                                <i class="bi bi-trash"></i>
+                                                Hapus
+
+                                            </button>
+
+                                        </form>
+
+                                    @else
+
+                                        <span class="text-muted">-</span>
+
+                                    @endif
 
                                 </td>
 
@@ -314,9 +339,7 @@
                         @empty
 
                             <tr>
-
-                                <td colspan="6"
-                                    class="text-center py-5">
+                                <td colspan="7" class="text-center py-5">
 
                                     <i class="bi bi-people fs-1 text-muted"></i>
 
@@ -329,7 +352,6 @@
                                     </p>
 
                                 </td>
-
                             </tr>
 
                         @endforelse
@@ -406,15 +428,11 @@
                 {{-- Body Modal --}}
                 <div class="modal-body">
 
-                    
                     {{-- Email --}}
                     <div class="mb-3">
 
-                        <label for="email"
-                               class="form-label fw-semibold">
-
+                        <label for="email" class="form-label fw-semibold">
                             Email
-
                         </label>
 
                         <input type="email"
@@ -434,11 +452,8 @@
                     {{-- Role --}}
                     <div class="mb-3">
 
-                        <label for="role"
-                               class="form-label fw-semibold">
-
+                        <label for="role" class="form-label fw-semibold">
                             Role
-
                         </label>
 
                         <select name="role"
@@ -446,22 +461,16 @@
                                 class="form-select"
                                 required>
 
-                            <option value="">
-                                Pilih Role
-                            </option>
+                            <option value="">Pilih Role</option>
 
                             <option value="admin"
                                 {{ old('role') == 'admin' ? 'selected' : '' }}>
-
                                 Admin
-
                             </option>
 
                             <option value="kasir"
                                 {{ old('role') == 'kasir' ? 'selected' : '' }}>
-
                                 Kasir
-
                             </option>
 
                         </select>
@@ -473,11 +482,8 @@
 
                         <div class="mb-3">
 
-                            <label for="outlet_id"
-                                   class="form-label fw-semibold">
-
+                            <label for="outlet_id" class="form-label fw-semibold">
                                 Outlet
-
                             </label>
 
                             <select name="outlet_id"
@@ -485,9 +491,7 @@
                                     class="form-select"
                                     required>
 
-                                <option value="">
-                                    Pilih Outlet
-                                </option>
+                                <option value="">Pilih Outlet</option>
 
                                 @foreach($outlets as $outlet)
 

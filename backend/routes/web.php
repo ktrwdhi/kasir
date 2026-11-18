@@ -35,4 +35,6 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::delete('/product/{id}',[productController::class,'delete'])->name('products.delete');
     Route::resource('categories', categoryController::class)
     ->names('categories');
+    Route::delete('/users/{id}', [userController::class, 'destroy'])
+    ->name('users.destroy');
 });
