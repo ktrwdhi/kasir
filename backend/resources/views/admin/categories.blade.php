@@ -132,8 +132,8 @@
 
             {{-- PAGINATION --}}
             @if(method_exists($categories, 'links'))
-                <div class="mt-3">
-                    {{ $categories->links() }}
+                <div class="mt-3 product-pagination">
+                    {{ $categories->withQueryString()->links('pagination::bootstrap-5') }}
                 </div>
             @endif
 

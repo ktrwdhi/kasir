@@ -378,8 +378,8 @@
 
                 </small>
 
-                <div>
-                    {{ $users->links() }}
+                <div class="mt-3 product-pagination">
+                    {{ $users->withQueryString()->links('pagination::bootstrap-5') }}
                 </div>
 
             </div>

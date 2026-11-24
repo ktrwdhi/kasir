@@ -297,8 +297,8 @@
                     transaksi
                 </small>
 
-                <div>
-                    {{ $transactions->links() }}
+                <div class="mt-3 product-pagination">
+                    {{ $transactions->withQueryString()->links('pagination::bootstrap-5') }}
                 </div>
             </div>
 

@@ -854,8 +854,8 @@
         </div>
 
         {{-- PAGINATION --}}
-        <div class="mt-3">
-            {{ $products->links() }}
+        <div class="mt-3 product-pagination">
+            {{ $products->withQueryString()->links('pagination::bootstrap-5') }}
         </div>
 
     </div>
