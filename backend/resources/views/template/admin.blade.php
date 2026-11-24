@@ -289,7 +289,15 @@
             Kategori
         </a>
 
-        @if (Auth()->user()->role == "owner")    
+        @if (auth()->user()->role === 'admin')
+            <a href="{{ route('admin.outlet.products') }}"
+                class="{{ request()->routeIs('admin.outlet.products') ? 'active' : '' }}">
+                <i class="bi bi-bag-check"></i>
+                <span>Produk Outlet Saya</span>
+            </a>
+        @endif
+
+        @if (auth()->user()->role === 'owner')
             <a href="{{ route('admin.outlet.index') }}"
                 class="{{ request()->routeIs('admin.outlet.index') ? 'active' : '' }}">
                 <i class="bi bi-shop"></i>

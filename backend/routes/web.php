@@ -16,11 +16,13 @@ Route::get('/user-edit/{uuid}',[userController::class,'edit'])->name('user.edit'
 Route::put('/user-update',[userController::class,'update'])->name('user.update');
 
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['role:owner'])->group(function () {        
+        Route::get('/outlets',[outletController::class,'index'])->name('outlet.index');
+        Route::post('/outlet',[outletController::class,'store'])->name('outlet.store');
+        Route::get('/outlet/{uuid}',[outletController::class,'show'])->name('outlet.show');
+    });
     Route::get('/dashboard', [dashboardController::class, 'index'])->name('dashboard');
     Route::get('/products',[productController::class,'index'])->name('products.index');
-    Route::get('/outlets',[outletController::class,'index'])->name('outlet.index');
-    Route::post('/outlet',[outletController::class,'store'])->name('outlet.store');
-    Route::get('/outlet/{uuid}',[outletController::class,'show'])->name('outlet.show');
     Route::post('/logout',[authController::class,'logout'])->name('logout');
     Route::post('/product',[productController::class,'store'])->name('products.store');
     Route::get('/product/{id}',[outletController::class,'showOutletByProduct'])->name('product.show');
@@ -37,4 +39,6 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     ->names('categories');
     Route::delete('/users/{id}', [userController::class, 'destroy'])
     ->name('users.destroy');
+    Route::get('/my-outlet/products', [outletController::class, 'showProduct'])
+            ->name('outlet.products');
 });

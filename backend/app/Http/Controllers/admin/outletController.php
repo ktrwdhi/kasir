@@ -145,4 +145,50 @@ public function delete($id)
     return redirect()->route('admin.outlet.index')
         ->with('success', 'Outlet berhasil dihapus.');
 }
+
+    public function showProduct(Request $request){
+        $user = auth()->user();
+
+        if (($user->role ?? null) !== 'admin') {
+            abort(403, 'Halaman ini khusus untuk role admin.');
+        }
+
+        if (! $user->outlet_id) {
+            abort(403, 'Akun admin belum terhubung ke outlet mana pun.');
+        }
+
+        $outlet = outlet::findOrFail($user->outlet_id);
+        $categories = category::all();
+
+        $productIds = productDetail::where('outlet_id', $outlet->id)
+            ->select('product_id')
+            ->distinct()
+            ->pluck('product_id');
+
+        $products = products::with('category')
+            ->whereIn('id', $productIds)
+            ->when($request->search, function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request->search . '%');
+            })
+            ->when($request->category, function ($query) use ($request) {
+                $query->where('category_id', $request->category);
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        $detailsByProduct = productDetail::with('varians')
+            ->where('outlet_id', $outlet->id)
+            ->whereIn('product_id', $products->pluck('id'))
+            ->get()
+            ->groupBy('product_id');
+
+        return view('admin.outlet-products', compact(
+            'outlet',
+            'categories',
+            'products',
+            'detailsByProduct'
+        ));
+    }
+    
 }

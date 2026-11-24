@@ -3,6 +3,11 @@
 @section('content')
 @section('page-title', 'Outlets')
 
+@php
+    $currentUser = auth()->user();
+    $isAdmin = ($currentUser->role ?? null) === 'admin';
+@endphp
+
 <div class="container-fluid outlet-page">
 
     {{-- HEADER --}}
@@ -15,9 +20,17 @@
 
             <p class="text-muted mb-0">
                 @if(isset($product))
-                    Daftar outlet yang menjual {{ $product->name }}.
+                    @if($isAdmin)
+                        Status produk {{ $product->name }} di outlet Anda.
+                    @else
+                        Daftar outlet yang menjual {{ $product->name }}.
+                    @endif
                 @else
-                    Kelola outlet yang tersedia.
+                    @if($isAdmin)
+                        Outlet yang Anda kelola.
+                    @else
+                        Kelola outlet yang tersedia.
+                    @endif
                 @endif
             </p>
         </div>
@@ -35,7 +48,7 @@
                 {{ $outlets->count() }} Outlet
             </span>
 
-            @if(!isset($product))
+            @if(!isset($product) && !$isAdmin)
                 <button
                     type="button"
                     class="btn btn-primary"
@@ -111,21 +124,21 @@
 
                 </div>
 
-                <div class="button">
-                    <button
-                        type="button"
-                        class="tambah"
-                        data-bs-toggle="modal"
-                        data-bs-target="#addProductToOutletModal"
-                    >
-                        <i class="bi bi-plus-lg me-1"></i>
-                        Tambahkan ke Outlet yang Tersedia
-                    </button>
-                </div>
+                @if(isset($availableOutlets) && $availableOutlets->isNotEmpty())
+                    <div class="button">
+                        <button
+                            type="button"
+                            class="tambah"
+                            data-bs-toggle="modal"
+                            data-bs-target="#addProductToOutletModal"
+                        >
+                            <i class="bi bi-plus-lg me-1"></i>
+                            Tambahkan ke Outlet yang Tersedia
+                        </button>
+                    </div>
+                @endif
 
             </div>
-
-            
         </div>
     @endif
 
@@ -197,9 +210,17 @@
 
                     <p class="text-muted mb-0">
                         @if(isset($product))
-                            Belum ada outlet yang tersedia.
+                            @if($isAdmin)
+                                Produk ini belum tersedia di outlet Anda.
+                            @else
+                                Belum ada outlet yang menjual produk ini.
+                            @endif
                         @else
-                            Data outlet belum tersedia.
+                            @if($isAdmin)
+                                Anda belum terhubung ke outlet mana pun.
+                            @else
+                                Data outlet belum tersedia.
+                            @endif
                         @endif
                     </p>
 
@@ -275,7 +296,6 @@
                         value="{{ $product->id }}"
                     >
 
-
                     {{-- INFORMASI PRODUK --}}
                     <div class="mb-3">
 
@@ -292,9 +312,109 @@
 
                     </div>
 
-                @if($availableOutlets->isNotEmpty())
-                    
-                    <div class="mb-3">
+                    @if(isset($availableOutlets) && $availableOutlets->isNotEmpty())
+
+                        {{-- PILIH OUTLET --}}
+                        <div class="mb-3">
+
+                            <label
+                                for="outlet_id"
+                                class="form-label fw-semibold"
+                            >
+                                Pilih Outlet
+                            </label>
+
+                            <select
+                                name="outlet_id"
+                                id="outlet_id"
+                                class="form-select @error('outlet_id') is-invalid @enderror"
+                                required
+                            >
+
+                                <option value="">
+                                    -- Pilih Outlet --
+                                </option>
+
+                                @foreach($availableOutlets as $outlet)
+                                    <option
+                                        value="{{ $outlet->id }}"
+                                        {{ (old('outlet_id') == $outlet->id || ($isAdmin && $availableOutlets->count() === 1)) ? 'selected' : '' }}
+                                    >
+                                        {{ $outlet->name }}
+                                    </option>
+                                @endforeach
+
+                            </select>
+
+                            @error('outlet_id')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+
+                        </div>
+
+
+                        {{-- HARGA PRODUK --}}
+                        <div class="mb-3">
+
+                            <label
+                                for="price"
+                                class="form-label fw-semibold"
+                            >
+                                Harga Produk
+                            </label>
+
+                            <input
+                                type="number"
+                                name="price"
+                                id="price"
+                                class="form-control @error('price') is-invalid @enderror"
+                                value="{{ old('price') }}"
+                                placeholder="Masukkan harga produk"
+                                min="0"
+                                required
+                            >
+
+                            @error('price')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+
+                        </div>
+
+
+                        {{-- STOK PRODUK --}}
+                        <div class="mb-3">
+
+                            <label
+                                for="stock"
+                                class="form-label fw-semibold"
+                            >
+                                Stok Awal
+                            </label>
+
+                            <input
+                                type="number"
+                                name="stock"
+                                id="stock"
+                                class="form-control @error('stock') is-invalid @enderror"
+                                value="{{ old('stock') }}"
+                                placeholder="Masukkan stok awal"
+                                min="0"
+                                required
+                            >
+
+                            @error('stock')
+                                <div class="invalid-feedback">
+                                    {{ $message }}
+                                </div>
+                            @enderror
+
+                        </div>
+
+                    @else
 
                         <label
                             for="outlet_id"
@@ -303,111 +423,16 @@
                             Pilih Outlet
                         </label>
 
-                        <select
-                            name="outlet_id"
-                            id="outlet_id"
-                            class="form-select @error('outlet_id') is-invalid @enderror"
-                            required
-                        >
-
-                            <option value="">
-                                -- Pilih Outlet --
-                            </option>
-
-                            @foreach($availableOutlets as $outlet)
-                                <option
-                                    value="{{ $outlet->id }}"
-                                    {{ old('outlet_id') == $outlet->id ? 'selected' : '' }}
-                                >
-                                    {{ $outlet->name }}
-                                </option>
-                            @endforeach
-
-                        </select>
-
-                        @error('outlet_id')
-                            <div class="invalid-feedback">
-                                {{ $message }}
-                            </div>
-                        @enderror
-
-                    </div>
-
-
-                    {{-- HARGA PRODUK --}}
-                    <div class="mb-3">
-
-                        <label
-                            for="price"
-                            class="form-label fw-semibold"
-                        >
-                            Harga Produk
-                        </label>
-
                         <input
-                            type="number"
-                            name="price"
-                            id="price"
-                            class="form-control @error('price') is-invalid @enderror"
-                            value="{{ old('price') }}"
-                            placeholder="Masukkan harga produk"
-                            min="0"
-                            required
+                            type="text"
+                            class="form-control"
+                            value="{{ $isAdmin ? 'Produk sudah terdaftar di outlet Anda' : 'Semua outlet sudah menjual produk ini' }}"
+                            disabled
                         >
 
-                        @error('price')
-                            <div class="invalid-feedback">
-                                {{ $message }}
-                            </div>
-                        @enderror
-
-                    </div>
-
-
-                    {{-- STOK PRODUK --}}
-                    <div class="mb-3">
-
-                        <label
-                            for="stock"
-                            class="form-label fw-semibold"
-                        >
-                            Stok Awal
-                        </label>
-
-                        <input
-                            type="number"
-                            name="stock"
-                            id="stock"
-                            class="form-control @error('stock') is-invalid @enderror"
-                            placeholder="Masukkan stok awal"
-                            min="0"
-                            required
-                        >
-
-                        @error('stock')
-                            <div class="invalid-feedback">
-                                {{ $message }}
-                            </div>
-                        @enderror
-
-                    </div>
+                    @endif
 
                 </div>
-            @else
-                <label
-                    for="outlet_id"
-                    class="form-label fw-semibold"
-                >
-                    Pilih Outlet
-                </label>
-                <input
-                    type="text"
-                    class="form-control"
-                    value="Semua outlet sudah menjual produk ini"
-                    disabled
-                >
-            @endif
-                    {{-- PILIH OUTLET --}}
 
 
                 {{-- FOOTER MODAL --}}
@@ -421,13 +446,15 @@
                         Batal
                     </button>
 
-                    <button
-                        type="submit"
-                        class="btn btn-primary"
-                    >
-                        <i class="bi bi-plus-lg me-1"></i>
-                        Tambahkan Produk
-                    </button>
+                    @if(isset($availableOutlets) && $availableOutlets->isNotEmpty())
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            <i class="bi bi-plus-lg me-1"></i>
+                            Tambahkan Produk
+                        </button>
+                    @endif
 
                 </div>
 
@@ -443,10 +470,10 @@
 
 
 {{-- ================================================== --}}
-{{-- MODAL TAMBAH OUTLET --}}
+{{-- MODAL TAMBAH OUTLET (HANYA NON-ADMIN) --}}
 {{-- ================================================== --}}
 
-@if(!isset($product))
+@if(!isset($product) && !$isAdmin)
 
 <div
     class="modal fade"
@@ -598,13 +625,11 @@
     document.addEventListener('DOMContentLoaded', function () {
 
         @if(isset($product))
-
             const modalElement = document.getElementById('addProductToOutletModal');
-
-        @else
-
+        @elseif(!$isAdmin)
             const modalElement = document.getElementById('addOutletModal');
-
+        @else
+            const modalElement = null;
         @endif
 
         if (modalElement) {
@@ -819,7 +844,6 @@
             padding: 0 8px 20px;
         }
 
-        /* Header halaman */
         .outlet-page > .d-flex:first-child {
             flex-direction: column;
             align-items: stretch !important;
@@ -841,7 +865,6 @@
             flex: 1;
         }
 
-        /* Card outlet */
         .outlet-card .card-body {
             padding: 18px;
         }
@@ -861,7 +884,6 @@
             font-size: 12px;
         }
 
-        /* Informasi produk */
         .card-body-product {
             flex-direction: column;
             align-items: stretch;
@@ -884,7 +906,6 @@
             font-size: 13px;
         }
 
-        /* Modal */
         .modal-dialog {
             max-width: none;
             width: auto;

@@ -95,19 +95,21 @@
                                         </button>
 
                                         {{-- DELETE --}}
-                                        <form
-                                            action="{{ route('admin.categories.destroy', $category->id) }}"
-                                            method="POST"
-                                            onsubmit="return confirm('Yakin ingin menghapus kategori ini?')">
+                                        @if (auth()->user()?->role === 'owner')
+                                            <form
+                                                action="{{ route('admin.categories.destroy', $category->id) }}"
+                                                method="POST"
+                                                onsubmit="return confirm('Yakin ingin menghapus kategori ini?')"
+                                                class="d-inline"
+                                            >
+                                                @csrf
+                                                @method('DELETE')
 
-                                            @csrf
-                                            @method('DELETE')
-
-                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
-
+                                                <button type="submit" class="btn btn-sm btn-danger" title="Hapus Kategori">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
