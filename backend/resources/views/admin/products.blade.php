@@ -857,8 +857,8 @@
         </div>
 
         {{-- PAGINATION --}}
-        <div class="mt-3">
-            {{ $products->links() }}
+        <div class="mt-3 product-pagination">
+            {{ $products->withQueryString()->links('pagination::bootstrap-5') }}
         </div>
 
     </div>
@@ -1302,6 +1302,23 @@
     .modal-body .form-control,
     .modal-body .form-select {
         font-size: 14px;
+    }
+}
+.product-pagination .pagination {
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 0;
+}
+
+@media (max-width: 576px) {
+    .product-pagination nav > div {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 10px;
+    }
+
+    .product-pagination .pagination {
+        justify-content: center;
     }
 }
 </style>
