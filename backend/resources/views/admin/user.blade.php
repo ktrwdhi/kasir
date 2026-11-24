@@ -1,4 +1,3 @@
-
 @extends('template.admin')
 
 @section('title', 'Users')
@@ -9,23 +8,6 @@
 
 <div class="container-fluid">
 
-    {{-- Notifikasi --}}
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show">
-            <i class="bi bi-check-circle me-2"></i>
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show">
-            <i class="bi bi-exclamation-circle me-2"></i>
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
     {{-- Statistik --}}
     <div class="row g-4 mb-4">
 
@@ -35,7 +17,9 @@
                     <div class="d-flex justify-content-between align-items-center">
 
                         <div>
-                            <p class="text-muted mb-1">Total Users</p>
+                            <p class="text-muted mb-1">
+                                {{ Auth::user()->role === 'admin' ? 'Total Kasir' : 'Total Users' }}
+                            </p>
                             <h3 class="fw-bold mb-0">
                                 {{ number_format($totalUsers) }}
                             </h3>
@@ -88,11 +72,13 @@
                 <div>
                     <h5 class="fw-bold mb-1">
                         <i class="bi bi-people me-2"></i>
-                        Data Users
+                        {{ Auth::user()->role === 'admin' ? 'Data Kasir' : 'Data Users' }}
                     </h5>
 
                     <small class="text-muted">
-                        Daftar pengguna berdasarkan outlet
+                        {{ Auth::user()->role === 'admin'
+                            ? 'Daftar kasir pada outlet ' . (Auth::user()->outlet->name ?? '-')
+                            : 'Daftar pengguna berdasarkan outlet' }}
                     </small>
                 </div>
 
@@ -102,7 +88,7 @@
                         data-bs-target="#addUserModal">
 
                     <i class="bi bi-person-plus me-1"></i>
-                    Tambah User
+                    {{ Auth::user()->role === 'admin' ? 'Tambah Kasir' : 'Tambah User' }}
 
                 </button>
 
@@ -117,7 +103,7 @@
                   class="row g-3 mb-4">
 
                 {{-- Pencarian --}}
-                <div class="{{ Auth::user()->role === 'owner' ? 'col-md-3' : 'col-md-4' }}">
+                <div class="{{ Auth::user()->role === 'owner' ? 'col-md-3' : 'col-md-6' }}">
 
                     <input type="text"
                            name="search"
@@ -127,7 +113,7 @@
 
                 </div>
 
-                {{-- Filter Outlet khusus Owner --}}
+                {{-- Filter Outlet & Role khusus Owner --}}
                 @if(Auth::user()->role === 'owner')
 
                     <div class="col-md-3">
@@ -149,33 +135,32 @@
 
                     </div>
 
+                    <div class="col-md-2">
+
+                        <select name="role" class="form-select">
+
+                            <option value="">Semua Role</option>
+
+                            <option value="owner"
+                                {{ request('role') == 'owner' ? 'selected' : '' }}>
+                                Owner
+                            </option>
+
+                            <option value="admin"
+                                {{ request('role') == 'admin' ? 'selected' : '' }}>
+                                Admin
+                            </option>
+
+                            <option value="kasir"
+                                {{ request('role') == 'kasir' ? 'selected' : '' }}>
+                                Kasir
+                            </option>
+
+                        </select>
+
+                    </div>
+
                 @endif
-
-                {{-- Filter Role --}}
-                <div class="{{ Auth::user()->role === 'owner' ? 'col-md-2' : 'col-md-3' }}">
-
-                    <select name="role" class="form-select">
-
-                        <option value="">Semua Role</option>
-
-                        <option value="owner"
-                            {{ request('role') == 'owner' ? 'selected' : '' }}>
-                            Owner
-                        </option>
-
-                        <option value="admin"
-                            {{ request('role') == 'admin' ? 'selected' : '' }}>
-                            Admin
-                        </option>
-
-                        <option value="kasir"
-                            {{ request('role') == 'kasir' ? 'selected' : '' }}>
-                            Kasir
-                        </option>
-
-                    </select>
-
-                </div>
 
                 {{-- Tombol --}}
                 <div class="col-md-2 d-flex gap-2">
@@ -290,7 +275,7 @@
 
                                 {{-- Tanggal --}}
                                 <td>
-                                    {{ $user->created_at->format('d/m/Y') }}
+                                    {{ $user->created_at?->format('d/m/Y') ?? '-' }}
                                 </td>
 
                                 {{-- Aksi --}}
@@ -374,7 +359,7 @@
 
                     dari
                     {{ $users->total() }}
-                    users
+                    {{ Auth::user()->role === 'admin' ? 'kasir' : 'users' }}
 
                 </small>
 
@@ -413,7 +398,7 @@
                         id="addUserModalLabel">
 
                         <i class="bi bi-person-plus me-2"></i>
-                        Tambah User
+                        {{ Auth::user()->role === 'admin' ? 'Tambah Kasir' : 'Tambah User' }}
 
                     </h5>
 
@@ -449,64 +434,74 @@
 
                     </div>
 
-                    {{-- Role --}}
-                    <div class="mb-3">
+                    @if(Auth::user()->role === 'admin')
 
-                        <label for="role" class="form-label fw-semibold">
-                            Role
-                        </label>
+                        {{-- Hidden input otomatis untuk Admin --}}
+                        <input type="hidden" name="role" value="kasir">
+                        <input type="hidden" name="outlet_id" value="{{ Auth::user()->outlet_id }}">
 
-                        <select name="role"
-                                id="role"
-                                class="form-select"
-                                required>
+                    @else
 
-                            <option value="">Pilih Role</option>
-
-                            <option value="admin"
-                                {{ old('role') == 'admin' ? 'selected' : '' }}>
-                                Admin
-                            </option>
-
-                            <option value="kasir"
-                                {{ old('role') == 'kasir' ? 'selected' : '' }}>
-                                Kasir
-                            </option>
-
-                        </select>
-
-                    </div>
-
-                    {{-- Outlet khusus Owner --}}
-                    @if(Auth::user()->role === 'owner')
-
+                        {{-- Role --}}
                         <div class="mb-3">
 
-                            <label for="outlet_id" class="form-label fw-semibold">
-                                Outlet
+                            <label for="role" class="form-label fw-semibold">
+                                Role
                             </label>
 
-                            <select name="outlet_id"
-                                    id="outlet_id"
+                            <select name="role"
+                                    id="role"
                                     class="form-select"
                                     required>
 
-                                <option value="">Pilih Outlet</option>
+                                <option value="">Pilih Role</option>
 
-                                @foreach($outlets as $outlet)
+                                <option value="admin"
+                                    {{ old('role') == 'admin' ? 'selected' : '' }}>
+                                    Admin
+                                </option>
 
-                                    <option value="{{ $outlet->id }}"
-                                        {{ old('outlet_id') == $outlet->id ? 'selected' : '' }}>
-
-                                        {{ $outlet->name }}
-
-                                    </option>
-
-                                @endforeach
+                                <option value="kasir"
+                                    {{ old('role') == 'kasir' ? 'selected' : '' }}>
+                                    Kasir
+                                </option>
 
                             </select>
 
                         </div>
+
+                        {{-- Outlet khusus Owner --}}
+                        @if(Auth::user()->role === 'owner')
+
+                            <div class="mb-3">
+
+                                <label for="outlet_id" class="form-label fw-semibold">
+                                    Outlet
+                                </label>
+
+                                <select name="outlet_id"
+                                        id="outlet_id"
+                                        class="form-select"
+                                        required>
+
+                                    <option value="">Pilih Outlet</option>
+
+                                    @foreach($outlets as $outlet)
+
+                                        <option value="{{ $outlet->id }}"
+                                            {{ old('outlet_id') == $outlet->id ? 'selected' : '' }}>
+
+                                            {{ $outlet->name }}
+
+                                        </option>
+
+                                    @endforeach
+
+                                </select>
+
+                            </div>
+
+                        @endif
 
                     @endif
 
@@ -527,7 +522,7 @@
                             class="btn btn-primary">
 
                         <i class="bi bi-save me-1"></i>
-                        Simpan User
+                        {{ Auth::user()->role === 'admin' ? 'Simpan Kasir' : 'Simpan User' }}
 
                     </button>
 

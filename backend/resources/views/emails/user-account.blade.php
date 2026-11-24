@@ -3,114 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Informasi Akun KasirApp</title>
+    <title>Aktivasi Akun KasirApp</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #edf2f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+<body style="margin: 0; padding: 0; background-color: #eef2f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #0f172a;">
 
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #edf2f8; padding: 40px 15px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #eef2f6; padding: 40px 16px;">
         <tr>
             <td align="center">
 
-                <!-- Main Container -->
-                <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+                <!-- Wrapper -->
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 24px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 20px 45px -15px rgba(15, 23, 42, 0.12);">
 
-                    {{-- HEADER --}}
+                    <!-- TOP BRAND BAR -->
                     <tr>
-                        <td align="center" style="background: linear-gradient(135deg, #19387c 0%, #2563eb 100%); padding: 45px 25px;">
-                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold; letter-spacing: 1px;">
-                                🚀 KasirApp
-                            </h1>
-                            <p style="margin: 10px 0 0; color: #cbd5e1; font-size: 12px; letter-spacing: 2px; text-transform: uppercase;">
-                                Cashier Management System
-                            </p>
-                            <div style="width: 50px; height: 3px; background-color: #60a5fa; margin: 20px auto 0; border-radius: 2px;"></div>
+                        <td style="background-color: #0f172a; padding: 28px 36px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td align="left" valign="middle">
+                                        <span style="display: inline-block; width: 10px; height: 10px; background-color: #38bdf8; border-radius: 50%; margin-right: 8px;"></span>
+                                        <span style="color: #ffffff; font-size: 20px; font-weight: 800; letter-spacing: -0.3px; vertical-align: middle;">
+                                            KasirApp
+                                        </span>
+                                    </td>
+                                    <td align="right" valign="middle">
+                                        <span style="display: inline-block; background-color: rgba(56, 189, 248, 0.15); color: #7dd3fc; border: 1px solid rgba(125, 211, 252, 0.25); font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; padding: 5px 12px; border-radius: 999px;">
+                                            Akun Baru
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
                         </td>
                     </tr>
 
-                    {{-- CONTENT --}}
+                    <!-- HERO ACCENT STRIP -->
                     <tr>
-                        <td style="padding: 40px 35px;">
-
-                            <p style="margin: 0 0 10px; color: #2563eb; font-size: 11px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase;">
-                                Account Activation
-                            </p>
-
-                            <h2 style="margin: 0 0 15px; color: #1e293b; font-size: 24px; line-height: 1.4;">
-                                Selamat Datang, Pengguna KasirApp! 
-                            </h2>
-
-                            <p style="margin: 0 0 25px; color: #475569; font-size: 15px; line-height: 1.7;">
-                                Akun kamu telah berhasil dibuat. Sekarang kamu dapat menggunakan KasirApp untuk mendukung seluruh aktivitas operasional kasir dengan mudah. Berikut adalah informasi kredensial akun kamu:
-                            </p>
-
-                            {{-- LOGIN CARD --}}
-                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
-                                <tr>
-                                    <td style="padding: 25px;">
-                                        <p style="margin: 0 0 6px; color: #64748b; font-size: 11px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase;">
-                                            Username
-                                        </p>
-                                        <p style="margin: 0 0 20px; color: #19387c; font-size: 18px; font-weight: bold; word-break: break-word;">
-                                            {{ $username }}
-                                        </p>
-
-                                        <div style="height: 1px; background-color: #e2e8f0; margin-bottom: 20px;"></div>
-
-                                        <p style="margin: 0 0 6px; color: #64748b; font-size: 11px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase;">
-                                            Password
-                                        </p>
-                                        <p style="margin: 0; color: #19387c; font-size: 18px; font-weight: bold; word-break: break-word; letter-spacing: 1px;">
-                                            {{ $password }}
-                                        </p>
-                                    </td>
-                                </tr>
-                            </table>
-
-                            {{-- QUICK LINKS (DATA DIRI & EDIT AKUN) --}}
-                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f1f5f9; border-radius: 10px; margin-bottom: 30px;">
-                                <tr>
-                                    <td style="padding: 20px;">
-                                        <p style="margin: 0 0 10px; color: #334155; font-size: 13px; font-weight: bold;">
-                                            Kelola Profil & Akun Anda: 
-                                            <a href="{{ route('user.edit',$uuid) }}" style="color: #2563eb; text-decoration: underline;">Edit Profil</a>
-                                        </p>
-                                    </td>
-                                </tr>
-                            </table>
-
-                            {{-- SECURITY ALERT --}}
-                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #fffbeb; border-radius: 8px; border-left: 4px solid #f59e0b;">
-                                <tr>
-                                    <td style="padding: 18px 20px;">
-                                        <p style="margin: 0 0 6px; color: #92400e; font-size: 13px; font-weight: bold;">
-                                            Perhatian Keamanan
-                                        </p>
-                                        <p style="margin: 0; color: #92400e; font-size: 12px; line-height: 1.6;">
-                                            Jangan bagikan informasi login ini kepada siapa pun. Segera ubah password Anda demi keamanan setelah berhasil masuk ke aplikasi.
-                                        </p>
-                                    </td>
-                                </tr>
-                            </table>
-
-                            <p style="margin: 30px 0 0; color: #64748b; font-size: 14px; line-height: 1.6;">
-                                Terima kasih telah bergabung!<br>
-                                <strong>Tim KasirApp</strong>
-                            </td>
+                        <td style="background: linear-gradient(90deg, #19387c 0%, #2563eb 60%, #0ea5e9 100%); height: 5px; font-size: 0; line-height: 0;">
+                            &nbsp;
+                        </td>
                     </tr>
 
-                    {{-- FOOTER --}}
+                    <!-- BODY -->
                     <tr>
-                        <td align="center" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 25px 20px;">
-                            <h3 style="margin: 0 0 8px; color: #19387c; font-size: 15px;">
-                                KasirApp
-                            </h3>
-                            <p style="margin: 0; color: #94a3b8; font-size: 11px; line-height: 1.6;">
-                                Cashier Management System<br>
-                                Email ini dikirim secara otomatis. Mohon tidak membalas email ini.
+                        <td style="padding: 36px 36px 32px;">
+
+                            <h1 style="margin: 0 0 10px; color: #0f172a; font-size: 24px; font-weight: 800; letter-spacing: -0.4px; line-height: 1.3;">
+                                Selamat datang di KasirApp
+                            </h1>
+
+                            <p style="margin: 0 0 28px; color: #475569; font-size: 15px; line-height: 1.65;">
+                                Akun operasional kamu sudah aktif dan siap dipakai. Gunakan kredensial di bawah ini untuk login, lalu atur ulang profil serta password kamu.
                             </p>
-                            <p style="margin: 15px 0 0; color: #cbd5e1; font-size: 11px;">
+
+                            <!-- 2-COLUMN CREDENTIALS CARD -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; margin-bottom: 28px;">
+                                <tr>
+                                    <td width="50%" valign="top" style="padding: 20px; border-right: 1px solid #e2e8f0;">
+                                        <div style="color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
+                                            Username
+                                        </div>
+                                        <div style="color: #19387c; font-size: 15px; font-weight: 700; font-family: 'Cascadia Code', Consolas, 'Courier New', monospace; word-break: break-all;">
+                                            {{ $username }}
+                                        </div>
+                                    </td>
+                                    <td width="50%" valign="top" style="padding: 20px;">
+                                        <div style="color: #64748b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
+                                            Password Awal
+                                        </div>
+                                        <div style="color: #0f172a; font-size: 15px; font-weight: 700; font-family: 'Cascadia Code', Consolas, 'Courier New', monospace; word-break: break-all;">
+                                            {{ $password }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- ACTION BOX -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f0f9ff; border: 1px solid #bae6fd; border-radius: 16px; margin-bottom: 24px;">
+                                <tr>
+                                    <td style="padding: 22px 24px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td valign="middle" style="padding-bottom: 14px;">
+                                                    <div style="color: #0369a1; font-size: 15px; font-weight: 700; margin-bottom: 4px;">
+                                                        Aktivasi &amp; Lengkapi Profil
+                                                    </div>
+                                                    <div style="color: #334155; font-size: 13.5px; line-height: 1.5;">
+                                                        Sesuaikan nama lengkap dan ganti password awal agar akun lebih aman.
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td valign="middle">
+                                                    <a href="{{ route('user.edit', $uuid) }}"
+                                                       style="display: inline-block; background-color: #19387c; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 700; padding: 12px 24px; border-radius: 12px;">
+                                                        Lengkapi Data Anda &rarr;
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- SECURITY NOTE -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 28px;">
+                                <tr>
+                                    <td width="4" style="background-color: #f59e0b; border-radius: 4px;"></td>
+                                    <td style="padding: 6px 0 6px 14px; color: #64748b; font-size: 12.5px; line-height: 1.6;">
+                                        <strong style="color: #334155;">Tips keamanan:</strong> Jangan bagikan kredensial ini ke siapa pun dan segera ganti password setelah login pertama.
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <div style="border-top: 1px solid #f1f5f9; padding-top: 20px; color: #475569; font-size: 14px; line-height: 1.6;">
+                                Sampai jumpa di dashboard,<br>
+                                <strong style="color: #0f172a;">Tim KasirApp</strong>
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    <!-- FOOTER -->
+                    <tr>
+                        <td align="center" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 22px 24px;">
+                            <div style="color: #475569; font-size: 12px; font-weight: 600;">
+                                KasirApp &bull; Cashier Management System
+                            </div>
+                            <div style="color: #94a3b8; font-size: 11px; margin-top: 6px; line-height: 1.5;">
+                                Email otomatis — mohon tidak membalas pesan ini.<br>
                                 &copy; {{ date('Y') }} KasirApp. All rights reserved.
-                            </p>
+                            </div>
                         </td>
                     </tr>
 

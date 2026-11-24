@@ -9,6 +9,9 @@ use App\Http\Controllers\admin\transactionController;
 use App\Http\Controllers\admin\userController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/contoh',function(){
+    return view('welcome');
+});
 Route::get('/',[authController::class,'isLoggedIn']);
 Route::get('/login',[authController::class,'showLogin'])->name('login');
 Route::post('/login',[authController::class,'login'])->name('login.store');

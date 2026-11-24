@@ -8,6 +8,7 @@ use App\Models\outlet;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use illuminate\Support\Str;
@@ -17,57 +18,42 @@ class userController extends Controller
     public function index(Request $request)
     {
         $userLogin = Auth::user();
+        $isAdmin = $userLogin->role === 'admin';
 
-        $users = User::with('outlet')
-                ->where('role', '!=', 'owner')
-
-            // Admin hanya melihat user dari outlet miliknya
-            ->when($userLogin->role === 'admin', function ($query) use ($userLogin) {
-                $query->where('outlet_id', $userLogin->outlet_id);
+        $baseQuery = User::with('outlet')
+            ->where('role', '!=', 'owner')
+            ->when($isAdmin, function ($query) use ($userLogin) {
+                $query->where('role', 'kasir')
+                    ->where('outlet_id', $userLogin->outlet_id);
             })
-
-            // Owner dapat memilih outlet
             ->when(
-                $userLogin->role === 'owner' && $request->filled('outlet_id'),
+                !$isAdmin && $request->filled('outlet_id'),
                 function ($query) use ($request) {
                     $query->where('outlet_id', $request->outlet_id);
                 }
             )
-
-            // Filter pencarian
+            ->when(
+                !$isAdmin && $request->filled('role'),
+                function ($query) use ($request) {
+                    $query->where('role', $request->role);
+                }
+            )
             ->when($request->filled('search'), function ($query) use ($request) {
-                $query->where(function ($q) use ($request) {
-                    $q->where('name', 'like', '%' . $request->search . '%')
-                      ->orWhere('username', 'like', '%' . $request->search . '%');
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('username', 'like', '%' . $search . '%');
                 });
-            })
+            });
 
-            // Filter role
-            ->when($request->filled('role'), function ($query) use ($request) {
-                $query->where('role', $request->role);
-            })
+        $totalUsers = (clone $baseQuery)->count();
 
+        $users = $baseQuery
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
-        // Total user mengikuti filter outlet
-        $totalUsers = User::when(
-            $userLogin->role === 'admin',
-            function ($query) use ($userLogin) {
-                $query->where('outlet_id', $userLogin->outlet_id);
-            }
-        )
-        ->when(
-            $userLogin->role === 'owner' && $request->filled('outlet_id'),
-            function ($query) use ($request) {
-                $query->where('outlet_id', $request->outlet_id);
-            }
-        )
-        ->count();
-
-        // Dropdown outlet untuk Owner
-        $outlets = outlet::all();
+        $outlets = $isAdmin ? collect() : Outlet::all();
 
         return view('admin.user', compact(
             'users',
@@ -78,48 +64,61 @@ class userController extends Controller
     
     public function store(Request $request)
     {
-        $request->validate([
+        $authUser = Auth::user();
+        $isOwner = $authUser->role === 'owner';
+
+        $validated = $request->validate([
             'email' => 'required|email|max:255|unique:users,email',
-            'role' => 'required|in:admin,kasir',
-            'outlet_id' => Auth::user()->role === 'owner'
-                ? 'required|exists:outlets,id'
-                : 'nullable',
+            'role' => $isOwner ? 'required|in:admin,kasir' : 'nullable',
+            'outlet_id' => $isOwner ? 'required|exists:outlets,id' : 'nullable',
         ]);
 
-        // Menentukan outlet
-        if (Auth::user()->role === 'owner') {
-            $outletId = $request->outlet_id;
-        } else {
-            $outletId = Auth::user()->outlet_id;
-        }
+        $role = $isOwner ? $validated['role'] : 'kasir';
+        $outletId = $isOwner ? $validated['outlet_id'] : $authUser->outlet_id;
 
-        // Generate username dan password
+        $uuid = (string) Str::uuid();
         $username = Str::random(15);
         $password = Str::random(10);
 
-        // Simpan user
-        $user = User::create([
-            'uuid' => Str::uuid(),
-            'username' => $username,
-            'email' => $request->email,
-            'password' => Hash::make($password),
-            'role' => $request->role,
-            'outlet_id' => $outletId,
-        ]);
+        try {
+            Mail::to($validated['email'])->send(
+                new UserMail(
+                    $username,
+                    $password,
+                    $uuid
+                )
+            );
 
-        // Kirim email
-        Mail::to($user->email)->send(
-            new UserMail(
-                $user->username,
+            DB::transaction(function () use (
+                $uuid,
+                $username,
+                $validated,
                 $password,
-                $user->uuid
-            )
-        );
+                $role,
+                $outletId
+            ) {
+                User::create([
+                    'uuid' => $uuid,
+                    'username' => $username,
+                    'email' => $validated['email'],
+                    'password' => Hash::make($password),
+                    'role' => $role,
+                    'outlet_id' => $outletId,
+                ]);
+            });
+        } catch (\Throwable $e) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Gagal mengirim email aktivasi. Data user belum disimpan: ' . $e->getMessage());
+        }
 
         return redirect()
             ->route('admin.users.index')
-            ->with('success', 'User berhasil ditambahkan dan username serta password telah dikirim ke email.');
-
+            ->with(
+                'success',
+                'User berhasil ditambahkan dan username serta password telah dikirim ke email.'
+            );
     }
 
     public function edit($uuid)
@@ -140,8 +139,10 @@ class userController extends Controller
         ]);
 
         $user = User::where('uuid', $request->uuid)->firstOrFail();
+        $uuid = Str::uuid();
 
         $data = [
+            'uuid' => $uuid,
             'name' => $request->name,
             'phone' => $request->phone,
             'sex' => $request->sex,
